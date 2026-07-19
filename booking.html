@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>จองทัวร์ - inongtravel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/css/main.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<header class="header"><nav class="navbar">
+<a href="index.html" class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></a>
+<div class="nav-links"><a href="index.html">หน้าแรก</a><a href="tours.html">ทัวร์ทั้งหมด</a></div>
+<div class="nav-right"><button class="theme-toggle"><i class="fas fa-sun"></i></button><button class="mobile-toggle"><span></span><span></span><span></span></button></div>
+</nav></header>
+
+<div style="padding:90px 0 20px;text-align:center;background:var(--bg-2);"><div class="container"><h1 style="font-size:2rem;">จองทัวร์</h1></div></div>
+
+<section class="section container">
+<div class="booking-steps">
+<div class="booking-step active" data-step="1"><div class="num">1</div><span class="lbl">ข้อมูลผู้เดินทาง</span></div>
+<div class="step-line" data-line="1"></div>
+<div class="booking-step" data-step="2"><div class="num">2</div><span class="lbl">ชำระเงิน</span></div>
+<div class="step-line" data-line="2"></div>
+<div class="booking-step" data-step="3"><div class="num">3</div><span class="lbl">ยืนยัน</span></div>
+</div>
+
+<div class="booking-layout">
+<div>
+<!-- Step 1 -->
+<div class="booking-page" id="step1">
+<div class="booking-form">
+<h3 style="font-family:'Poppins',sans-serif;font-size:1.1rem;margin-bottom:20px;">ข้อมูลผู้เดินทาง</h3>
+<form id="bookingForm" onsubmit="return false;">
+<div class="form-row"><div class="form-group"><label>วันเดินทาง</label><input type="date" id="bkDate" required></div><div class="form-group"><label>จำนวนผู้เดินทาง</label><input type="number" id="bkTravelers" value="1" min="1" max="10"></div></div>
+<div class="form-row"><div class="form-group"><label>ชื่อ</label><input type="text" id="bkFirstName" placeholder="ชื่อ" required></div><div class="form-group"><label>นามสกุล</label><input type="text" id="bkLastName" placeholder="นามสกุล" required></div></div>
+<div class="form-group"><label>เบอร์โทร</label><input type="tel" id="bkPhone" placeholder="0xx-xxx-xxxx" required></div>
+<div class="form-group"><label>หมายเหตุพิเศษ</label><textarea id="bkNote" rows="3" placeholder="เช่น อาหารมังสวิรัติ, ขอห้องวิวทะเล..."></textarea></div>
+<div style="display:flex;gap:12px;"><a href="tours.html" class="btn btn-outline" style="flex:1;justify-content:center;">กลับ</a><button type="button" class="btn btn-gold next-step" style="flex:2;justify-content:center;">ดำเนินการต่อ <i class="fas fa-arrow-right"></i></button></div>
+</form>
+</div></div>
+
+<!-- Step 2 -->
+<div class="booking-page" id="step2" style="display:none;">
+<div class="booking-form">
+<h3 style="font-family:'Poppins',sans-serif;font-size:1.1rem;margin-bottom:20px;">ชำระเงิน</h3>
+<div style="margin-bottom:20px;"><p style="font-size:.88rem;color:var(--text-2);margin-bottom:12px;">โอนเงินมาที่บัญชี:</p>
+<div style="background:var(--bg-4);border-radius:8px;padding:16px;margin-bottom:12px;">
+<p style="font-size:.85rem;"><strong>ธนาคารกสิกรไทย</strong></p>
+<p style="font-size:1.2rem;font-weight:700;color:var(--gold);">074-8-80992-9</p>
+<p style="font-size:.82rem;color:var(--text-3);">ชื่อบัญชี: บริษัท inongtravel จำกัด</p></div></div>
+<div class="form-group"><label>อัปโหลดสลิปการโอนเงิน</label>
+<div class="upload-area" onclick="document.getElementById('slipFile').click()"><i class="fas fa-cloud-upload-alt"></i><p>คลิกเพื่อเลือกไฟล์สลิป</p><input type="file" id="slipFile" accept="image/*" style="display:none;"></div></div>
+<div class="form-group"><label>รหัสคูปองส่วนลด</label>
+<div style="display:flex;gap:8px;"><input type="text" id="couponCode" placeholder="กรอกรหัสคูปอง" style="flex:1;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:.88rem;"><button type="button" class="btn btn-outline btn-sm" onclick="applyCoupon()">ตรวจสอบ</button></div>
+<div id="couponMsg" style="margin-top:8px;font-size:.82rem;display:none;"></div></div>
+<div style="display:flex;gap:12px;"><button type="button" class="btn btn-outline prev-step" style="flex:1;justify-content:center;">ย้อนกลับ</button><button type="button" class="btn btn-gold next-step" style="flex:2;justify-content:center;">ยืนยันการจอง <i class="fas fa-lock"></i></button></div>
+</div></div>
+
+<!-- Step 3 -->
+<div class="booking-page" id="step3" style="display:none;">
+<div class="booking-form" style="text-align:center;padding:48px;">
+<div style="width:80px;height:80px;border-radius:50%;background:rgba(39,174,96,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;"><i class="fas fa-check" style="font-size:2rem;color:#27ae60;"></i></div>
+<h3 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:8px;">จองสำเร็จ!</h3>
+<p style="color:var(--text-2);margin-bottom:16px;">การจองของคุณได้รับการบันทึกแล้ว รอการอนุมัติจากทีมงาน</p>
+<p style="font-size:.85rem;color:var(--text-3);margin-bottom:24px;">รหัสการจอง: <strong style="color:var(--gold);">#BK<span id="bookingCode"></span></strong></p>
+<p style="font-size:.85rem;color:var(--text-3);margin-bottom:24px;">โอนเงินมาที่: <strong style="color:var(--gold);">074-8-80992-9</strong> (กสิกรไทย)</p>
+<div style="display:flex;gap:12px;justify-content:center;"><a href="user.html" class="btn btn-gold">ดูประวัติการจอง</a><a href="index.html" class="btn btn-outline">กลับหน้าแรก</a></div>
+</div></div>
+</div>
+
+<!-- Summary -->
+<div class="booking-summary">
+<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:16px;">สรุปการจอง</h4>
+<img id="summaryImg" src="" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:12px;">
+<p style="font-weight:600;margin-bottom:4px;" id="summaryTour"></p>
+<p style="font-size:.82rem;color:var(--text-3);margin-bottom:16px;" id="summaryNights"></p>
+<div class="summary-row"><span>ราคาต่อคน</span><span id="summaryPrice"></span></div>
+<div class="summary-row"><span>จำนวนผู้เดินทาง</span><span id="summaryTravelers">1 คน</span></div>
+<div class="summary-total"><span>รวมทั้งหมด</span><span id="summaryTotal"></span></div>
+</div>
+</div>
+</section>
+
+<script src="assets/js/app.js"></script>
+<script>
+// Check login
+const bkUser=getUser();if(!bkUser){window.location.href='auth.html'}
+
+// Get tour from URL
+const params=new URLSearchParams(location.search);const tourId=params.get('tour');
+let selectedTour=TOURS.find(t=>t.id===tourId);
+if(!selectedTour){selectedTour=TOURS[0]}
+
+// Fill summary
+document.getElementById('summaryImg').src=selectedTour.images?.[0]||selectedTour.img||'';
+document.getElementById('summaryTour').textContent=selectedTour.name;
+document.getElementById('summaryNights').textContent=`${selectedTour.nights} วัน ${selectedTour.nights-1} คืน`;
+document.getElementById('summaryPrice').innerHTML=`&#3645;${selectedTour.price.toLocaleString()}`;
+document.getElementById('summaryTotal').innerHTML=`&#3645;${selectedTour.price.toLocaleString()}`;
+
+// Travelers change
+document.getElementById('bkTravelers')?.addEventListener('change',function(){
+  const total=selectedTour.price*parseInt(this.value);
+  document.getElementById('summaryTotal').innerHTML=`&#3645;${total.toLocaleString()}`;
+  document.getElementById('summaryTravelers').textContent=this.value+' คน';
+});
+
+// Step navigation
+let step=1;
+document.querySelectorAll('.next-step').forEach(btn=>{btn.addEventListener('click',()=>{
+  if(step<3){
+    document.querySelector(`.booking-step[data-step="${step}"]`).classList.remove('active');
+    document.querySelector(`.booking-step[data-step="${step}"]`).classList.add('done');
+    document.querySelector(`.step-line[data-line="${step}"]`)?.classList.add('active');
+    document.querySelectorAll('.booking-page').forEach(p=>p.style.display='none');
+    step++;document.querySelector(`.booking-step[data-step="${step}"]`).classList.add('active');
+    document.getElementById(`step${step}`).style.display='block';
+    if(step===3)submitBooking();
+  }
+})});
+document.querySelectorAll('.prev-step').forEach(btn=>{btn.addEventListener('click',()=>{
+  if(step>1){
+    document.querySelector(`.booking-step[data-step="${step}"]`).classList.remove('active');
+    document.querySelector(`.step-line[data-line="${step-1}"]`)?.classList.remove('active');
+    document.querySelectorAll('.booking-page').forEach(p=>p.style.display='none');
+    step--;document.querySelector(`.booking-step[data-step="${step}"]`).classList.remove('done');
+    document.querySelector(`.booking-step[data-step="${step}"]`).classList.add('active');
+    document.getElementById(`step${step}`).style.display='block';
+  }
+})});
+
+// Submit booking
+async function submitBooking(){
+  const u=getUser();if(!u){showToast('กรุณาเข้าสู่ระบบ','error');return}
+  const travelers=parseInt(document.getElementById('bkTravelers').value)||1;
+  try{
+    const docRef=await db.collection('bookings').add({
+      userId:u.id,tourId:selectedTour.id,tourName:selectedTour.name,
+      tourImg:selectedTour.images?.[0]||'',
+      date:document.getElementById('bkDate').value,
+      travelers,firstName:document.getElementById('bkFirstName').value,
+      lastName:document.getElementById('bkLastName').value,
+      phone:document.getElementById('bkPhone').value,
+      note:document.getElementById('bkNote').value,
+      total:selectedTour.price*travelers,status:'pending',
+      createdAt:new Date().toISOString()
+    });
+    document.getElementById('bookingCode').textContent=docRef.id.slice(-6).toUpperCase();
+    showToast('จองสำเร็จ!','success');
+  }catch(e){showToast('เกิดข้อผิดพลาด: '+e.message,'error')}
+}
+
+// Coupon
+function applyCoupon(){
+  const code=document.getElementById('couponCode').value.toUpperCase().trim();
+  const msg=document.getElementById('couponMsg');
+  if(['EARLY30','FLASH25','NEW15','SUMMER20','LUXE30','NEWUSER'].includes(code)){
+    msg.textContent='ใช้คูปอง '+code+' สำเร็จ!';msg.style.color='#27ae60';msg.style.display='block';
+    showToast('ใช้คูปองสำเร็จ!','success');
+  }else{msg.textContent='รหัสคูปองไม่ถูกต้อง';msg.style.color='#e74c3c';msg.style.display='block'}
+}
+</script>
+</body></html>

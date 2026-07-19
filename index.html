@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>inongtravel - ท่องเที่ยวสุดหรู</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/css/main.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<header class="header"><nav class="navbar">
+<a href="index.html" class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></a>
+<div class="nav-links"><a href="index.html" class="active">หน้าแรก</a><a href="tours.html">ทัวร์ทั้งหมด</a><a href="#" onclick="goWishlist(event)">รายการโปรด</a></div>
+<div class="nav-right"><button class="theme-toggle"><i class="fas fa-sun"></i></button><a href="#" class="nav-icon" onclick="goWishlist(event)"><i class="fas fa-heart"></i><span class="badge wishlist-badge">0</span></a><a href="auth.html" class="btn-login"><i class="fas fa-user"></i> เข้าสู่ระบบ</a><button class="mobile-toggle"><span></span><span></span><span></span></button></div>
+</nav></header>
+
+<section class="hero">
+<div class="hero-slide active"><img class="hero-bg" src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1600&q=80" alt=""></div>
+<div class="hero-slide"><img class="hero-bg" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&q=80" alt=""></div>
+<div class="hero-slide"><img class="hero-bg" src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1600&q=80" alt=""></div>
+<div class="hero-overlay"></div>
+<div class="slider-arrows"><button class="slider-arrow prev"><i class="fas fa-chevron-left"></i></button><button class="slider-arrow next"><i class="fas fa-chevron-right"></i></button></div>
+<div class="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+<div class="hero-content"><div class="hero-tag">ค้นพบโลกในแบบหรูหรา</div><h2>ท่องเที่ยว <span>สุดหรู</span><br>เหนือจินตนาการ</h2><p>สัมผัสประสบการณ์การเดินทางระดับพรีเมียม กับโรงแรมสุดหรู和服务ระดับโลก</p><a href="tours.html" class="btn btn-gold">สำรองทัวร์เลย <i class="fas fa-arrow-right"></i></a></div>
+</section>
+
+<div class="container"><div class="search-box">
+<div class="search-tabs"><button class="search-tab active"><i class="fas fa-map-marker-alt"></i> ทัวร์</button><button class="search-tab"><i class="fas fa-hotel"></i> โรงแรม</button><button class="search-tab"><i class="fas fa-plane"></i> เที่ยวบิน</button></div>
+<div class="search-fields">
+<div class="search-field"><label>จุดหมาย</label><input type="text" placeholder="想去哪里？"></div>
+<div class="search-field"><label>วันเดินทาง</label><input type="date"></div>
+<div class="search-field"><label>ผู้เดินทาง</label><input type="number" value="2" min="1"></div>
+<div class="search-field"><label>งบประมาณ</label><select><option>ทุกงบ</option><option>ต่ำกว่า 50,000</option><option>50,000 - 100,000</option><option>100,000+</option></select></div>
+<a href="tours.html" class="btn btn-gold">ค้นหา <i class="fas fa-search"></i></a>
+</div></div></div>
+
+<section class="section container"><div class="section-header"><div><div class="section-tag">สำรวจจุดหมายปลายทาง</div><h2 class="section-title">ประเทศยอดนิยม</h2></div><a href="tours.html" class="section-link">ดูทั้งหมด <i class="fas fa-arrow-right"></i></a></div>
+<div class="dest-grid" id="destGrid"><p style="color:var(--text-3);padding:20px;">กำลังโหลด...</p></div></section>
+
+<section class="section container"><div class="section-header"><div><div class="section-tag">คัดสรรมาเพื่อคุณ</div><h2 class="section-title">แพ็กเกจทัวร์ยอดนิยม</h2></div><a href="tours.html" class="section-link">ดูทั้งหมด <i class="fas fa-arrow-right"></i></a></div>
+<div class="tour-grid" id="homeTours"></div></section>
+
+<div class="container"><div class="features">
+<div class="feature"><div class="feature-icon"><i class="fas fa-tag"></i></div><div><h5>รับประกันราคาดีที่สุด</h5><p>คัดสรรราคาคุ้มค่าที่สุด</p></div></div>
+<div class="feature"><div class="feature-icon"><i class="fas fa-crown"></i></div><div><h5>ประสบการณ์หรูหรา</h5><p>โรงแรมและบริการระดับพรีเมียม</p></div></div>
+<div class="feature"><div class="feature-icon"><i class="fas fa-shield-alt"></i></div><div><h5>จองปลอดภัย</h5><p>ระบบชำระเงินปลอดภัย 100%</p></div></div>
+<div class="feature"><div class="feature-icon"><i class="fas fa-headset"></i></div><div><h5>บริการ 24 ชม.</h5><p>พร้อมช่วยเหลือทุกเมื่อ</p></div></div>
+</div></div>
+
+<section class="section container"><div class="section-header"><div><div class="section-tag">เสียงจากลูกค้า</div><h2 class="section-title">รีวิวจากนักเดินทาง</h2></div></div>
+<div class="review-grid">
+<div class="review-card"><div class="review-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"ทริปมัลดีฟส์สุดยอดมากค่ะ วิลล่าสวย น้ำใส อาหารอร่อย ประทับใจมาก"</p><div class="review-author"><img src="https://randomuser.me/api/portraits/women/44.jpg" class="review-avatar"><div><div class="review-name">คุณสมหญิง</div><div class="review-role">นักเดินทาง</div></div></div></div>
+<div class="review-card"><div class="review-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"สวิตเซอร์แลนด์สวยมากกว่าในรูปอีก ทุกอย่างจัดสรรดีมาก แนะนำเลยครับ"</p><div class="review-author"><img src="https://randomuser.me/api/portraits/men/32.jpg" class="review-avatar"><div><div class="review-name">คุณสมชาย</div><div class="review-role">นักเดินทาง</div></div></div></div>
+<div class="review-card"><div class="review-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"เป็นครั้งที่ 3 ที่จองกับ inongtravel ไม่เคยผิดหวังเลยค่ะ บริการดีมาก"</p><div class="review-author"><img src="https://randomuser.me/api/portraits/women/68.jpg" class="review-avatar"><div><div class="review-name">คุณพิมพ์ใจ</div><div class="review-role">ลูกค้าประจำ</div></div></div></div>
+</div></section>
+
+<div class="container"><div class="cta"><h2>พร้อมเริ่มต้น<span style="color:var(--gold);">การเดินทาง</span>?</h2><p>สำรองแพ็กเกจทัวร์สุดหรูวันนี้ สร้างความทรงจำที่ไม่มีวันลืม</p><a href="tours.html" class="btn btn-gold">สำรองทัวร์เลย <i class="fas fa-arrow-right"></i></a></div></div>
+
+<footer class="footer"><div class="container">
+<div class="footer-grid">
+<div class="footer-brand"><div class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></div><p>สร้างประสบการณ์การเดินทางสุดหรูตั้งแต่ปี 2015</p><div class="footer-social"><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-twitter"></i></a></div></div>
+<div class="footer-col"><h4>ลิงก์ด่วน</h4><a href="tours.html">ทัวร์ทั้งหมด</a><a href="auth.html">เข้าสู่ระบบ</a><a href="auth.html">สมัครสมาชิก</a></div>
+<div class="footer-col"><h4>จุดหมายยอดนิยม</h4><a href="tours.html">มัลดีฟส์</a><a href="tours.html">สวิตเซอร์แลนด์</a><a href="tours.html">ญี่ปุ่น</a><a href="tours.html">ดูไบ</a></div>
+<div class="footer-col"><h4>ติดต่อเรา</h4><a href="#">02-123-4567</a><a href="#">info@inongtravel.com</a><a href="#">เลขบัญชี: 074-8-80992-9</a></div>
+</div>
+<div class="footer-bottom"><span>&copy; 2026 inongtravel. สงวนลิขสิทธิ์ทุกประการ</span><div><i class="fab fa-cc-visa" style="font-size:1.4rem;margin:0 4px;"></i><i class="fab fa-cc-mastercard" style="font-size:1.4rem;margin:0 4px;"></i></div></div>
+</div></footer>
+
+<div class="modal-overlay" id="tourModal"><div class="modal"><button class="modal-close" onclick="closeModal()">&times;</button><div class="modal-body"></div></div></div>
+
+<script src="assets/js/app.js"></script>
+<script>
+// แสดงจุดหมายปลายทางจาก TOURS array (ทุกประเภท)
+function loadDestinations(){
+  const grid=document.getElementById('destGrid');
+  getToursFromDB().then(tours=>{
+    const types=['beach','mountain','city','adventure'];
+    const dests=types.map(type=>{const t=tours.find(x=>x.type===type);return t?{id:t.id,name:t.name,img:t.images?.[0]||'',price:t.price,type}:null}).filter(Boolean);
+    grid.innerHTML=dests.map(d=>`<div class="dest-card" onclick="showTourDetail('${d.id}')" style="cursor:pointer;"><img src="${d.img}" alt="${d.name}" loading="lazy"><div class="overlay"></div><div class="info"><h4>${d.name}</h4><span>&#3645;${d.price.toLocaleString()}</span></div></div>`).join('');
+  });
+}
+async function loadHomeTours(){const tours=await getToursFromDB();renderTours(document.getElementById('homeTours'),tours,4)}
+loadDestinations();loadHomeTours();
+function goWishlist(e){e.preventDefault();const u=getUser();u?window.location.href='user.html?panel=wishlist':window.location.href='auth.html'}
+</script>
+</body></html>

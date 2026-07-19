@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>เข้าสู่ระบบ - inongtravel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/css/main.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<header class="header"><nav class="navbar">
+<a href="index.html" class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></a>
+<div class="nav-links"><a href="index.html">หน้าแรก</a><a href="tours.html">ทัวร์ทั้งหมด</a></div>
+<div class="nav-right"><button class="theme-toggle"><i class="fas fa-sun"></i></button></div>
+</nav></header>
+
+<div class="auth-page"><div class="auth-card">
+<div class="auth-tabs">
+<button class="auth-tab active" data-tab="login">เข้าสู่ระบบ</button>
+<button class="auth-tab" data-tab="register">สมัครสมาชิก</button>
+</div>
+<div class="tab-content active" id="login">
+<h2>ยินดีต้อนรับกลับ</h2><p class="sub">เข้าสู่ระบบเพื่อดำเนินการต่อ</p>
+<form onsubmit="return false;">
+<div class="form-group"><label>อีเมล</label><input type="email" id="loginEmail" placeholder="อีเมล" required></div>
+<div class="form-group"><label>รหัสผ่าน</label><input type="password" id="loginPass" placeholder="รหัสผ่าน" required></div>
+<button type="button" id="loginBtn" class="btn btn-gold" style="width:100%;justify-content:center;padding:13px;" onclick="doLogin()">เข้าสู่ระบบ <i class="fas fa-arrow-right"></i></button>
+<div id="loginMsg" style="margin-top:12px;text-align:center;font-size:.85rem;display:none;"></div>
+</form>
+<p class="auth-link"><a href="#" onclick="document.querySelector('[data-tab=register]').click();return false;">ยังไม่มีบัญชี? สมัครสมาชิก</a></p>
+<p class="auth-link"><a href="#" onclick="showToast('กรุณาติดต่อ admin@inongtravel.com','info');return false;">ลืมรหัสผ่าน?</a></p>
+</div>
+<div class="tab-content" id="register">
+<h2>สร้างบัญชีใหม่</h2><p class="sub">สมัครสมาชิกเพื่อเริ่มต้นการเดินทาง</p>
+<form onsubmit="return false;">
+<div class="form-row"><div class="form-group"><label>ชื่อ</label><input type="text" id="regFirstName" placeholder="ชื่อ" required></div><div class="form-group"><label>นามสกุล</label><input type="text" id="regLastName" placeholder="นามสกุล" required></div></div>
+<div class="form-group"><label>อีเมล</label><input type="email" id="regEmail" placeholder="อีเมล" required></div>
+<div class="form-group"><label>เบอร์โทร</label><input type="tel" id="regPhone" placeholder="0xx-xxx-xxxx"></div>
+<div class="form-group"><label>รหัสผ่าน</label><input type="password" id="regPass" placeholder="รหัสผ่าน (6+ ตัวอักษร)" required minlength="6"></div>
+<button type="button" id="regBtn" class="btn btn-gold" style="width:100%;justify-content:center;padding:13px;" onclick="doRegister()">สมัครสมาชิก <i class="fas fa-arrow-right"></i></button>
+<div id="regMsg" style="margin-top:12px;text-align:center;font-size:.85rem;display:none;"></div>
+</form>
+</div>
+</div></div>
+
+<script src="assets/js/app.js"></script>
+<script>
+document.querySelectorAll('.auth-tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));tab.classList.add('active');document.getElementById(tab.dataset.tab)?.classList.add('active')})});
+
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const msg=document.getElementById('loginMsg');const btn=document.getElementById('loginBtn');
+  if(!email||!pass){msg.textContent='กรุณากรอกอีเมลและรหัสผ่าน';msg.style.display='block';msg.style.color='#e74c3c';return}
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> กำลังเข้าสู่ระบบ...';btn.disabled=true;msg.style.display='none';
+  try{
+    const snap=await db.collection('users').where('email','==',email).get();
+    if(snap.empty){msg.textContent='ไม่พบอีเมลนี้ในระบบ';msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='เข้าสู่ระบบ <i class="fas fa-arrow-right"></i>';btn.disabled=false;return}
+    const data=snap.docs[0].data();const uid=snap.docs[0].id;
+    if(data.password!==pass){msg.textContent='รหัสผ่านไม่ถูกต้อง';msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='เข้าสู่ระบบ <i class="fas fa-arrow-right"></i>';btn.disabled=false;return}
+    const user={id:uid,...data};localStorage.setItem('currentUser',JSON.stringify(user));
+    msg.textContent='เข้าสู่ระบบสำเร็จ!';msg.style.display='block';msg.style.color='#27ae60';
+    setTimeout(()=>{window.location.href=data.role==='admin'?'admin/index.html':'user.html'},800);
+  }catch(e){msg.textContent='เกิดข้อผิดพลาด: '+e.message;msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='เข้าสู่ระบบ <i class="fas fa-arrow-right"></i>';btn.disabled=false}
+}
+
+async function doRegister(){
+  const fn=document.getElementById('regFirstName').value.trim();
+  const ln=document.getElementById('regLastName').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const phone=document.getElementById('regPhone').value.trim();
+  const pass=document.getElementById('regPass').value;
+  const msg=document.getElementById('regMsg');const btn=document.getElementById('regBtn');
+  if(!fn||!ln||!email||!pass){msg.textContent='กรุณากรอกข้อมูลให้ครบทุกช่อง';msg.style.display='block';msg.style.color='#e74c3c';return}
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> กำลังสมัครสมาชิก...';btn.disabled=true;msg.style.display='none';
+  try{
+    const existing=await db.collection('users').where('email','==',email).get();
+    if(!existing.empty){msg.textContent='อีเมลนี้ถูกใช้แล้ว';msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='สมัครสมาชิก <i class="fas fa-arrow-right"></i>';btn.disabled=false;return}
+    await db.collection('users').add({firstName:fn,lastName:ln,email,phone,password:pass,role:'member',createdAt:new Date().toISOString()});
+    msg.textContent='สมัครสมาชิกสำเร็จ!';msg.style.display='block';msg.style.color='#27ae60';
+    setTimeout(()=>{document.querySelector('[data-tab=login]').click();document.getElementById('loginEmail').value=email;document.getElementById('loginPass').value=pass;msg.style.display='none';btn.innerHTML='สมัครสมาชิก <i class="fas fa-arrow-right"></i>';btn.disabled=false},1500);
+  }catch(e){msg.textContent='เกิดข้อผิดพลาด: '+e.message;msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='สมัครสมาชิก <i class="fas fa-arrow-right"></i>';btn.disabled=false}
+}
+</script>
+</body></html>

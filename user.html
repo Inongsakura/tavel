@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>บัญชีของฉัน - inongtravel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/css/main.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<header class="header"><nav class="navbar">
+<a href="index.html" class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></a>
+<div class="nav-links"><a href="index.html">หน้าแรก</a><a href="tours.html">ทัวร์ทั้งหมด</a><a href="user.html" class="active">บัญชีของฉัน</a></div>
+<div class="nav-right"><button class="theme-toggle"><i class="fas fa-sun"></i></button><button class="mobile-toggle"><span></span><span></span><span></span></button></div>
+</nav></header>
+
+<div class="container"><div class="user-layout">
+<div class="user-sidebar">
+<img src="" class="user-avatar" alt="avatar">
+<h4 class="user-name"></h4><p class="user-email"></p>
+<nav class="user-menu">
+<a href="#" class="active" data-panel="profile"><i class="fas fa-user"></i> แก้ไขข้อมูล</a>
+<a href="#" data-panel="password"><i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน</a>
+<a href="#" data-panel="bookings"><i class="fas fa-calendar-check"></i> ประวัติการจอง</a>
+<a href="#" data-panel="wishlist"><i class="fas fa-heart"></i> รายการโปรด</a>
+<a href="#" onclick="clearUser();window.location.href='index.html'"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
+</nav></div>
+<div class="user-content">
+<div class="user-panel active" id="profile">
+<h3>แก้ไขข้อมูลส่วนตัว</h3>
+<form id="profileForm" onsubmit="updateProfile(event)" style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:28px;">
+<div class="form-row"><div class="form-group"><label>ชื่อ</label><input type="text" name="firstName" required></div><div class="form-group"><label>นามสกุล</label><input type="text" name="lastName" required></div></div>
+<div class="form-group"><label>อีเมล</label><input type="email" name="email" readonly style="opacity:.6;"></div>
+<div class="form-group"><label>เบอร์โทร</label><input type="tel" name="phone"></div>
+<button type="submit" class="btn btn-gold">บันทึกข้อมูล</button>
+</form></div>
+<div class="user-panel" id="password">
+<h3>เปลี่ยนรหัสผ่าน</h3>
+<form id="passForm" onsubmit="changePassword(event)" style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:400px;">
+<div class="form-group"><label>รหัสผ่านเดิม</label><input type="password" name="oldPassword" required></div>
+<div class="form-group"><label>รหัสผ่านใหม่</label><input type="password" name="newPassword" required minlength="6"></div>
+<div class="form-group"><label>ยืนยันรหัสผ่านใหม่</label><input type="password" name="confirmPassword" required></div>
+<button type="submit" class="btn btn-gold">เปลี่ยนรหัสผ่าน</button>
+</form></div>
+<div class="user-panel" id="bookings"><h3>ประวัติการจอง</h3><div id="bookingList"></div></div>
+<div class="user-panel" id="wishlist"><h3>รายการโปรด</h3><div class="tour-grid" id="wishlistList"></div></div>
+</div></div></div>
+
+<div class="modal-overlay" id="tourModal"><div class="modal"><button class="modal-close" onclick="closeModal()">&times;</button><div class="modal-body"></div></div></div>
+
+<script src="assets/js/app.js"></script>
+<script>
+// Redirect if not logged in
+const user=getUser();if(!user){window.location.href='auth.html'}
+else if(user.role==='admin'){window.location.href='admin/index.html'}
+
+// Load user data
+if(user){
+  document.querySelector('.user-avatar').src=`https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=c8a97e&color=fff&size=80`;
+  document.querySelector('.user-name').textContent=`${user.firstName} ${user.lastName}`;
+  document.querySelector('.user-email').textContent=user.email;
+  const form=document.getElementById('profileForm');
+  if(form){form.firstName.value=user.firstName;form.lastName.value=user.lastName;form.email.value=user.email;form.phone.value=user.phone||''}
+}
+
+// Menu tabs
+document.querySelectorAll('.user-menu a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.user-menu a').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.user-panel').forEach(p=>p.classList.remove('active'));a.classList.add('active');document.getElementById(a.dataset.panel)?.classList.add('active')})});
+
+// URL param
+const params=new URLSearchParams(location.search);const panel=params.get('panel');
+if(panel)document.querySelector(`[data-panel="${panel}"]`)?.click();
+
+// Profile update
+async function updateProfile(e){
+  e.preventDefault();const u=getUser();if(!u)return;const f=e.target;
+  try{if(u.id&&u.id!=='admin')await db.collection('users').doc(u.id).update({firstName:f.firstName.value,lastName:f.lastName.value,phone:f.phone.value})}catch{}
+  setUser({...u,firstName:f.firstName.value,lastName:f.lastName.value,phone:f.phone.value});
+  showToast('บันทึกสำเร็จ!','success');initUserPanel();
+}
+function initUserPanel(){const u=getUser();if(!u)return;document.querySelector('.user-avatar').src=`https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=c8a97e&color=fff&size=80`;document.querySelector('.user-name').textContent=`${u.firstName} ${u.lastName}`;document.querySelector('.user-email').textContent=u.email;const form=document.getElementById('profileForm');if(form){form.firstName.value=u.firstName;form.lastName.value=u.lastName;form.email.value=u.email;form.phone.value=u.phone||''}}
+
+// Change password
+async function changePassword(e){
+  e.preventDefault();const f=e.target;const u=getUser();
+  if(f.oldPassword.value!==u.password){showToast('รหัสผ่านเดิมไม่ถูกต้อง','error');return}
+  if(f.newPassword.value!==f.confirmPassword.value){showToast('รหัสผ่านใหม่ไม่ตรงกัน','error');return}
+  try{if(u.id&&u.id!=='admin')await db.collection('users').doc(u.id).update({password:f.newPassword.value})}catch{}
+  setUser({...u,password:f.newPassword.value});f.reset();showToast('เปลี่ยนรหัสผ่านสำเร็จ!','success');
+}
+
+// Load bookings
+async function loadBookings(){
+  const el=document.getElementById('bookingList');const u=getUser();if(!el||!u)return;
+  try{
+    // ใช้ where อย่างเดียว ไม่ใช้ orderBy เพื่อหลีก composite index
+    const snap=await db.collection('bookings').where('userId','==',u.id).get();
+    const bks=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // เรียงลำดับด้วย JavaScript แทน
+    bks.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+    if(!bks.length){el.innerHTML='<p style="color:var(--text-3);text-align:center;padding:40px;">ยังไม่มีประวัติการจอง</p>';return}
+    el.innerHTML=bks.map(b=>`<div style="display:flex;gap:14px;padding:14px;background:var(--bg-4);border-radius:10px;margin-bottom:10px;align-items:center;">
+      <div style="flex:1;"><h4 style="font-family:'Poppins',sans-serif;font-size:.88rem;">${b.tourName}</h4>
+      <p style="font-size:.78rem;color:var(--text-3);">วันเดินทาง: ${b.date} | ${b.travelers} คน</p></div>
+      <div style="text-align:right;"><div style="font-weight:600;color:var(--gold);">&#3645;${(b.total||0).toLocaleString()}</div>
+      <span class="status status-${b.status}">${b.status==='active'?'ยืนยันแล้ว':b.status==='pending'?'รอตรวจสอบ':'ยกเลิก'}</span></div>
+    </div>`).join('');
+  }catch(e){console.error('loadBookings error:',e);el.innerHTML='<p style="color:var(--text-3);">ไม่สามารถโหลดข้อมูล: '+e.message+'</p>'}
+}
+
+// Load wishlist
+async function loadWishlist(){
+  const el=document.getElementById('wishlistList');const u=getUser();if(!el||!u)return;
+  const wl=JSON.parse(localStorage.getItem('wishlist_'+u.id)||'[]');
+  const tours=TOURS.filter(t=>wl.includes(t.id));
+  if(!tours.length){el.innerHTML='<div style="text-align:center;padding:48px 20px;color:var(--text-3);"><i class="far fa-heart" style="font-size:3rem;display:block;margin-bottom:12px;"></i><p>ยังไม่มีรายการโปรด</p></div>';return}
+  renderTours(el,tours);
+}
+
+loadBookings();loadWishlist();
+</script>
+</body></html>

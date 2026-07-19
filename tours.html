@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ทัวร์ทั้งหมด - inongtravel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/css/main.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<header class="header"><nav class="navbar">
+<a href="index.html" class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></a>
+<div class="nav-links"><a href="index.html">หน้าแรก</a><a href="tours.html" class="active">ทัวร์ทั้งหมด</a><a href="#" onclick="goWishlist(event)">รายการโปรด</a></div>
+<div class="nav-right"><button class="theme-toggle"><i class="fas fa-sun"></i></button><a href="#" class="nav-icon" onclick="goWishlist(event)"><i class="fas fa-heart"></i><span class="badge wishlist-badge">0</span></a><a href="auth.html" class="btn-login"><i class="fas fa-user"></i> เข้าสู่ระบบ</a><button class="mobile-toggle"><span></span><span></span><span></span></button></div>
+</nav></header>
+
+<div style="padding:100px 0 20px;text-align:center;background:var(--bg-2);"><div class="container"><h1 style="font-size:2.2rem;">ทัวร์ทั้งหมด</h1><p style="color:var(--text-3);">ค้นหาแพ็กเกจทัวร์สุดหรูที่เหมาะกับคุณ</p></div></div>
+
+<section class="section container">
+<div class="filter-bar">
+<div class="filter-tabs">
+<button class="filter-tab active" data-type="all">ทั้งหมด</button>
+<button class="filter-tab" data-type="beach">🏝 ชายหาด</button>
+<button class="filter-tab" data-type="mountain">🏔 ภูเขา</button>
+<button class="filter-tab" data-type="city">🏙 เมือง</button>
+<button class="filter-tab" data-type="adventure">🚵 ผจญภัย</button>
+</div>
+<div style="display:flex;gap:12px;align-items:center;">
+<input type="text" id="tourSearch" placeholder="ค้นหาทัวร์..." style="padding:8px 14px;background:var(--bg-input);border:1px solid var(--border);border-radius:6px;color:var(--text-1);font-size:.85rem;width:180px;outline:none;">
+<select id="sortSelect" style="padding:8px 14px;background:var(--bg-input);border:1px solid var(--border);border-radius:6px;color:var(--text-1);font-size:.85rem;"><option value="default">เรียงตาม: แนะนำ</option><option value="low">ราคา: ต่ำ→สูง</option><option value="high">ราคา: สูง→ต่ำ</option><option value="rating">คะแนนสูงสุด</option></select>
+</div>
+</div>
+<div class="tour-grid" id="tourGrid"></div>
+</section>
+
+<div class="modal-overlay" id="tourModal"><div class="modal"><button class="modal-close" onclick="closeModal()">&times;</button><div class="modal-body"></div></div></div>
+
+<footer class="footer"><div class="container"><div class="footer-bottom" style="border-top:none;"><span>&copy; 2026 inongtravel</span></div></div></footer>
+<script src="assets/js/app.js"></script>
+<script>
+function goWishlist(e){e.preventDefault();const u=getUser();u?window.location.href='user.html?panel=wishlist':window.location.href='auth.html'}
+</script>
+</body></html>

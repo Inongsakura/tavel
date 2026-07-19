@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>จัดการระบบ - inongtravel</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="admin-layout">
+<aside class="admin-sidebar">
+<a href="../index.html" class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></a>
+<nav class="admin-menu">
+<a href="#" class="active" data-section="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+<a href="#" data-section="admin-tours"><i class="fas fa-map-marked-alt"></i> จัดการทัวร์</a>
+<a href="#" data-section="admin-bookings"><i class="fas fa-calendar-check"></i> จัดการการจอง</a>
+<a href="#" data-section="admin-members"><i class="fas fa-users"></i> จัดการสมาชิก</a>
+<a href="#" data-section="admin-promos"><i class="fas fa-tags"></i> จัดการโปรโมชั่น</a>
+</nav>
+<div style="margin-top:auto;padding-top:20px;border-top:1px solid var(--border);">
+<a href="../index.html" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:.85rem;color:var(--text-3);"><i class="fas fa-arrow-left"></i> กลับหน้าเว็บ</a>
+<a href="#" onclick="clearUser();window.location.href='../auth.html'" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:.85rem;color:var(--text-3);"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
+<button class="theme-toggle" style="margin:10px 14px;width:auto;padding:8px 14px;border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:6px;" onclick="toggleTheme()"><i class="fas fa-sun"></i> สลับธีม</button>
+</div>
+</aside>
+
+<main class="admin-main">
+<!-- Dashboard -->
+<div class="admin-section active" id="dashboard">
+<div class="admin-header"><h2>Dashboard</h2><p style="color:var(--text-3);font-size:.85rem;">ภาพรวมระบบ inongtravel</p></div>
+<div class="stat-cards">
+<div class="stat-card"><div class="label">สมาชิกทั้งหมด</div><div class="value" id="statMembers">0</div></div>
+<div class="stat-card"><div class="label">การจองทั้งหมด</div><div class="value" id="statBookings">0</div></div>
+<div class="stat-card"><div class="label">ยอดขายรวม</div><div class="value" id="statRevenue">&#3645;0</div></div>
+<div class="stat-card"><div class="label">ทัวร์ทั้งหมด</div><div class="value" id="statTours">0</div></div>
+</div></div>
+
+<!-- Tours -->
+<div class="admin-section" id="admin-tours">
+<div class="admin-header"><h2>จัดการทัวร์</h2><button class="btn btn-gold btn-sm" onclick="document.getElementById('addTourForm').style.display=document.getElementById('addTourForm').style.display==='none'?'block':'none'"><i class="fas fa-plus"></i> เพิ่มทัวร์</button></div>
+<div id="addTourForm" style="display:none;background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:16px;">เพิ่มทัวร์ใหม่</h4>
+<form onsubmit="addTour(event)">
+<div class="form-row"><div class="form-group"><label>ชื่อทัวร์</label><input type="text" name="name" required></div><div class="form-group"><label>ประเทศ</label><input type="text" name="country" required></div></div>
+<div class="form-row"><div class="form-group"><label>ประเภท</label><select name="type"><option value="beach">ชายหาด</option><option value="mountain">ภูเขา</option><option value="city">เมือง</option><option value="adventure">ผจญภัย</option></select></div><div class="form-group"><label>ราคา (บาท)</label><input type="number" name="price" required></div></div>
+<div class="form-row"><div class="form-group"><label>จำนวนวัน</label><input type="number" name="nights" required></div><div class="form-group"><label>ลิงก์รูป</label><input type="url" name="img"></div></div>
+<div class="form-group"><label>รายละเอียด</label><textarea rows="2" name="desc"></textarea></div>
+<div class="form-group"><label>สิ่งที่รวม (comma)</label><input type="text" name="includes"></div>
+<button type="submit" class="btn btn-gold">บันทึกทัวร์</button>
+</form></div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;">
+<table class="data-table"><thead><tr><th>รหัส</th><th>ชื่อทัวร์</th><th>ประเทศ</th><th>ราคา</th><th>คะแนน</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="tourTableBody"></tbody></table>
+</div></div>
+
+<!-- Bookings -->
+<div class="admin-section" id="admin-bookings">
+<div class="admin-header"><h2>จัดการการจอง</h2></div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;">
+<table class="data-table"><thead><tr><th>รหัส</th><th>ลูกค้า</th><th>ทัวร์</th><th>วันเดินทาง</th><th>ยอดรวม</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="bookingTableBody"></tbody></table>
+</div></div>
+
+<!-- Members -->
+<div class="admin-section" id="admin-members">
+<div class="admin-header"><h2>จัดการสมาชิก</h2></div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;">
+<table class="data-table"><thead><tr><th>รหัส</th><th>ชื่อ</th><th>อีเมล</th><th>เบอร์โทร</th><th>วันที่สมัคร</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="memberTableBody"></tbody></table>
+</div></div>
+
+<!-- Promos -->
+<div class="admin-section" id="admin-promos">
+<div class="admin-header"><h2>จัดการโปรโมชั่น</h2><button class="btn btn-gold btn-sm" onclick="showToast('ฟีเจอร์นี้จะเพิ่มเร็วๆ นี้','info')"><i class="fas fa-plus"></i> เพิ่มโปรโมชั่น</button></div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;">
+<table class="data-table"><thead><tr><th>รหัส</th><th>ชื่อ</th><th>ส่วนลด</th><th>โค้ด</th><th>รายละเอียด</th><th>หมดอายุ</th><th>สถานะ</th></tr></thead><tbody id="promoTableBody"></tbody></table>
+</div></div>
+</main>
+</div>
+
+<div class="modal-overlay" id="tourModal" onclick="if(event.target===this)closeModal()"><div class="modal"><button class="modal-close" onclick="closeModal()">&times;</button><div class="modal-body"></div></div></div>
+
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/admin.js"></script>
+</body></html>
