@@ -1,87 +1,383 @@
 <!DOCTYPE html>
 <html lang="th" data-theme="dark">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>เข้าสู่ระบบ - inongtravel</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="assets/css/main.css">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>เข้าสู่ระบบ / สมัครสมาชิก - inongtravel</title>
+  <meta name="description" content="เข้าสู่ระบบหรือสมัครสมาชิก inongtravel เพื่อจองแพ็กเกจทัวร์สุดหรู">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23c9a96e'/><text x='50' y='68' font-size='55' font-weight='bold' text-anchor='middle' fill='white' font-family='serif'>i</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="assets/css/main.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-<header class="header"><nav class="navbar">
-<a href="index.html" class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></a>
-<div class="nav-links"><a href="index.html">หน้าแรก</a><a href="tours.html">ทัวร์ทั้งหมด</a></div>
-<div class="nav-right"><button class="theme-toggle"><i class="fas fa-sun"></i></button></div>
-</nav></header>
+  <header class="header"><nav class="navbar">
+    <a href="index.html" class="logo"><div class="logo-icon">i</div><h1>INONGTRAVEL</h1></a>
+    <div class="nav-links"><a href="index.html">หน้าแรก</a><a href="tours.html">ทัวร์ทั้งหมด</a></div>
+    <div class="nav-right"><button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-sun"></i></button><button class="mobile-toggle"><span></span><span></span><span></span></button></div>
+  </nav></header>
 
-<div class="auth-page"><div class="auth-card">
-<div class="auth-tabs">
-<button class="auth-tab active" data-tab="login">เข้าสู่ระบบ</button>
-<button class="auth-tab" data-tab="register">สมัครสมาชิก</button>
-</div>
-<div class="tab-content active" id="login">
-<h2>ยินดีต้อนรับกลับ</h2><p class="sub">เข้าสู่ระบบเพื่อดำเนินการต่อ</p>
-<form onsubmit="return false;">
-<div class="form-group"><label>อีเมล</label><input type="email" id="loginEmail" placeholder="อีเมล" required></div>
-<div class="form-group"><label>รหัสผ่าน</label><input type="password" id="loginPass" placeholder="รหัสผ่าน" required></div>
-<button type="button" id="loginBtn" class="btn btn-gold" style="width:100%;justify-content:center;padding:13px;" onclick="doLogin()">เข้าสู่ระบบ <i class="fas fa-arrow-right"></i></button>
-<div id="loginMsg" style="margin-top:12px;text-align:center;font-size:.85rem;display:none;"></div>
-</form>
-<p class="auth-link"><a href="#" onclick="document.querySelector('[data-tab=register]').click();return false;">ยังไม่มีบัญชี? สมัครสมาชิก</a></p>
-<p class="auth-link"><a href="#" onclick="showToast('กรุณาติดต่อ admin@inongtravel.com','info');return false;">ลืมรหัสผ่าน?</a></p>
-</div>
-<div class="tab-content" id="register">
-<h2>สร้างบัญชีใหม่</h2><p class="sub">สมัครสมาชิกเพื่อเริ่มต้นการเดินทาง</p>
-<form onsubmit="return false;">
-<div class="form-row"><div class="form-group"><label>ชื่อ</label><input type="text" id="regFirstName" placeholder="ชื่อ" required></div><div class="form-group"><label>นามสกุล</label><input type="text" id="regLastName" placeholder="นามสกุล" required></div></div>
-<div class="form-group"><label>อีเมล</label><input type="email" id="regEmail" placeholder="อีเมล" required></div>
-<div class="form-group"><label>เบอร์โทร</label><input type="tel" id="regPhone" placeholder="0xx-xxx-xxxx"></div>
-<div class="form-group"><label>รหัสผ่าน</label><input type="password" id="regPass" placeholder="รหัสผ่าน (6+ ตัวอักษร)" required minlength="6"></div>
-<button type="button" id="regBtn" class="btn btn-gold" style="width:100%;justify-content:center;padding:13px;" onclick="doRegister()">สมัครสมาชิก <i class="fas fa-arrow-right"></i></button>
-<div id="regMsg" style="margin-top:12px;text-align:center;font-size:.85rem;display:none;"></div>
-</form>
-</div>
-</div></div>
+  <div class="auth-page"><div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">เข้าสู่ระบบ</button>
+      <button class="auth-tab" data-tab="register">สมัครสมาชิก</button>
+    </div>
 
-<script src="assets/js/app.js"></script>
-<script>
-document.querySelectorAll('.auth-tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));tab.classList.add('active');document.getElementById(tab.dataset.tab)?.classList.add('active')})});
+    <!-- Login -->
+    <div class="tab-content active" id="login">
+      <h2>ยินดีต้อนรับกลับ</h2><p class="sub">เข้าสู่ระบบเพื่อดำเนินการต่อ</p>
+      <form id="loginForm" onsubmit="return false;">
+        <div class="form-group"><label>อีเมล</label><input type="email" id="loginEmail" placeholder="example@gmail.com" required></div>
+        <div class="form-group"><label>รหัสผ่าน</label>
+          <div class="input-password-wrap"><input type="password" id="loginPass" placeholder="รหัสผ่าน" required><button type="button" class="toggle-pass" onclick="togglePassword('loginPass',this)"><i class="fas fa-eye"></i></button></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--text-3);cursor:pointer;"><input type="checkbox" id="rememberMe" style="accent-color:var(--gold);width:16px;height:16px;"> จดจำฉัน</label>
+        </div>
+        <button type="submit" id="loginBtn" class="btn btn-gold" style="width:100%;justify-content:center;padding:14px;">เข้าสู่ระบบ <i class="fas fa-arrow-right"></i></button>
+        <div id="loginMsg" style="margin-top:14px;text-align:center;font-size:.85rem;display:none;"></div>
+      </form>
+      <p class="auth-link"><a href="#" onclick="switchTab('register');return false;">ยังไม่มีบัญชี? สมัครสมาชิก</a></p>
+      <p class="auth-link"><a href="#" onclick="showForgotPassword();return false;">ลืมรหัสผ่าน?</a></p>
+    </div>
 
-async function doLogin(){
-  const email=document.getElementById('loginEmail').value.trim();
-  const pass=document.getElementById('loginPass').value;
-  const msg=document.getElementById('loginMsg');const btn=document.getElementById('loginBtn');
-  if(!email||!pass){msg.textContent='กรุณากรอกอีเมลและรหัสผ่าน';msg.style.display='block';msg.style.color='#e74c3c';return}
-  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> กำลังเข้าสู่ระบบ...';btn.disabled=true;msg.style.display='none';
-  try{
-    const snap=await db.collection('users').where('email','==',email).get();
-    if(snap.empty){msg.textContent='ไม่พบอีเมลนี้ในระบบ';msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='เข้าสู่ระบบ <i class="fas fa-arrow-right"></i>';btn.disabled=false;return}
-    const data=snap.docs[0].data();const uid=snap.docs[0].id;
-    if(data.password!==pass){msg.textContent='รหัสผ่านไม่ถูกต้อง';msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='เข้าสู่ระบบ <i class="fas fa-arrow-right"></i>';btn.disabled=false;return}
-    const user={id:uid,...data};localStorage.setItem('currentUser',JSON.stringify(user));
-    msg.textContent='เข้าสู่ระบบสำเร็จ!';msg.style.display='block';msg.style.color='#27ae60';
-    setTimeout(()=>{window.location.href=data.role==='admin'?'admin/index.html':'user.html'},800);
-  }catch(e){msg.textContent='เกิดข้อผิดพลาด: '+e.message;msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='เข้าสู่ระบบ <i class="fas fa-arrow-right"></i>';btn.disabled=false}
-}
+    <!-- Register -->
+    <div class="tab-content" id="register">
+      <h2>สร้างบัญชีใหม่</h2><p class="sub">สมัครสมาชิกเพื่อเริ่มต้นการเดินทาง</p>
+      <form id="registerForm" onsubmit="return false;">
+        <div class="form-row"><div class="form-group"><label>ชื่อ</label><input type="text" id="regFirstName" placeholder="ชื่อ" required></div><div class="form-group"><label>นามสกุล</label><input type="text" id="regLastName" placeholder="นามสกุล" required></div></div>
+        <div class="form-group"><label>อีเมล</label><input type="email" id="regEmail" placeholder="example@gmail.com" required></div>
+        <div class="form-group"><label>เบอร์โทร <span style="color:var(--text-3);font-size:.72rem;">(ตัวเลข 10 หลัก)</span></label><input type="tel" id="regPhone" placeholder="0xx-xxx-xxxx" maxlength="10"></div>
+        <div class="form-group"><label>รหัสผ่าน</label>
+          <div class="input-password-wrap"><input type="password" id="regPass" placeholder="รหัสผ่าน (6+ ตัวอักษร)" required minlength="6"><button type="button" class="toggle-pass" onclick="togglePassword('regPass',this)"><i class="fas fa-eye"></i></button></div></div>
+        <div class="form-group"><label>ยืนยันรหัสผ่าน</label>
+          <div class="input-password-wrap"><input type="password" id="regPassConfirm" placeholder="กรอกรหัสผ่านอีกครั้ง" required minlength="6"><button type="button" class="toggle-pass" onclick="togglePassword('regPassConfirm',this)"><i class="fas fa-eye"></i></button></div></div>
+        <button type="submit" id="regBtn" class="btn btn-gold" style="width:100%;justify-content:center;padding:14px;">สมัครสมาชิก <i class="fas fa-arrow-right"></i></button>
+        <div id="regMsg" style="margin-top:14px;text-align:center;font-size:.85rem;display:none;"></div>
+      </form>
+      <p class="auth-link"><a href="#" onclick="switchTab('login');return false;">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</a></p>
+    </div>
+  </div></div>
 
-async function doRegister(){
-  const fn=document.getElementById('regFirstName').value.trim();
-  const ln=document.getElementById('regLastName').value.trim();
-  const email=document.getElementById('regEmail').value.trim();
-  const phone=document.getElementById('regPhone').value.trim();
-  const pass=document.getElementById('regPass').value;
-  const msg=document.getElementById('regMsg');const btn=document.getElementById('regBtn');
-  if(!fn||!ln||!email||!pass){msg.textContent='กรุณากรอกข้อมูลให้ครบทุกช่อง';msg.style.display='block';msg.style.color='#e74c3c';return}
-  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> กำลังสมัครสมาชิก...';btn.disabled=true;msg.style.display='none';
-  try{
-    const existing=await db.collection('users').where('email','==',email).get();
-    if(!existing.empty){msg.textContent='อีเมลนี้ถูกใช้แล้ว';msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='สมัครสมาชิก <i class="fas fa-arrow-right"></i>';btn.disabled=false;return}
-    await db.collection('users').add({firstName:fn,lastName:ln,email,phone,password:pass,role:'member',createdAt:new Date().toISOString()});
-    msg.textContent='สมัครสมาชิกสำเร็จ!';msg.style.display='block';msg.style.color='#27ae60';
-    setTimeout(()=>{document.querySelector('[data-tab=login]').click();document.getElementById('loginEmail').value=email;document.getElementById('loginPass').value=pass;msg.style.display='none';btn.innerHTML='สมัครสมาชิก <i class="fas fa-arrow-right"></i>';btn.disabled=false},1500);
-  }catch(e){msg.textContent='เกิดข้อผิดพลาด: '+e.message;msg.style.display='block';msg.style.color='#e74c3c';btn.innerHTML='สมัครสมาชิก <i class="fas fa-arrow-right"></i>';btn.disabled=false}
-}
-</script>
-</body></html>
+  <!-- Forgot Password Modal -->
+  <div class="modal-overlay" id="forgotModal"><div class="modal" style="max-width:420px;">
+    <button class="modal-close" onclick="closeForgotModal()">&times;</button>
+    <div style="text-align:center;padding:24px 0;">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--gold-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;"><i class="fas fa-lock" style="font-size:1.5rem;color:var(--gold);"></i></div>
+      <h3 style="font-family:'Sarabun',sans-serif;font-size:1.4rem;margin-bottom:10px;">ลืมรหัสผ่าน?</h3>
+      <p style="color:var(--text-3);font-size:.88rem;margin-bottom:28px;">กรอกอีเมลของคุณ เราจะส่งลิงก์รีเซ็ตรหัสผ่านให้</p>
+      <div class="form-group"><input type="email" id="forgotEmail" placeholder="example@gmail.com" style="text-align:center;"></div>
+      <button class="btn btn-gold" style="width:100%;justify-content:center;padding:14px;" onclick="submitForgotPassword()">ส่งลิงก์รีเซ็ตรหัสผ่าน</button>
+      <div id="forgotMsg" style="margin-top:14px;text-align:center;font-size:.85rem;display:none;"></div>
+    </div>
+  </div></div>
+
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAayCwC0UTVyISsKrNDNYdzGnQeFHpawAc",
+      authDomain: "inong-56c0f.firebaseapp.com",
+      projectId: "inong-56c0f",
+      storageBucket: "inong-56c0f.firebasestorage.app",
+      messagingSenderId: "838153924370",
+      appId: "1:838153924370:web:7a133b12866b6671f84dcb"
+    };
+    
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Theme toggle
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateThemeIcon(next);
+    }
+
+    function updateThemeIcon(theme) {
+      const btn = document.querySelector('.theme-toggle');
+      if (btn) {
+        btn.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      }
+    }
+
+    // Initialize theme on load
+    initTheme();
+
+    // Toast function
+    function showToast(msg, type = 'info') {
+      const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' };
+      const t = document.createElement('div');
+      t.className = 'toast ' + type;
+      t.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i><span>' + msg + '</span>';
+      document.body.appendChild(t);
+      requestAnimationFrame(() => t.classList.add('show'));
+      setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+    }
+
+    // Tab switching
+    function switchTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector('.auth-tab[data-tab="' + tab + '"]')?.classList.add('active');
+      document.getElementById(tab)?.classList.add('active');
+    }
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    });
+
+    // Toggle password visibility
+    function togglePassword(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      btn.innerHTML = isPassword ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+    }
+
+    // Forgot password modal
+    function showForgotPassword() {
+      document.getElementById('forgotModal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeForgotModal() {
+      document.getElementById('forgotModal').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    // Submit forgot password
+    async function submitForgotPassword() {
+      const email = document.getElementById('forgotEmail').value.trim();
+      const msg = document.getElementById('forgotMsg');
+      
+      if (!email) {
+        msg.textContent = 'กรุณากรอกอีเมล';
+        msg.style.color = '#e74c3c';
+        msg.style.display = 'block';
+        return;
+      }
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        msg.innerHTML = '<i class="fas fa-check-circle" style="color:#2ecc71;"></i> ส่งลิงก์รีเซ็ตรหัสผ่านไปที่<br><strong>' + email + '</strong> แล้ว<br><span style="font-size:.78rem;color:var(--text-3);">กรุณาตรวจสอบกล่องจดหมาย</span>';
+        msg.style.color = '#2ecc71';
+        msg.style.display = 'block';
+        showToast('ส่งลิงก์รีเซ็ตรหัสผ่านแล้ว!', 'success');
+      } catch (e) {
+        let errorMsg = 'เกิดข้อผิดพลาด';
+        if (e.code === 'auth/user-not-found') errorMsg = 'ไม่พบอีเมลนี้ในระบบ';
+        else if (e.code === 'auth/invalid-email') errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง';
+        msg.textContent = errorMsg;
+        msg.style.color = '#e74c3c';
+        msg.style.display = 'block';
+      }
+    }
+
+    // Login form
+    document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      doLogin();
+    });
+
+    // Login function
+    async function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPass').value;
+      const msg = document.getElementById('loginMsg');
+      const btn = document.getElementById('loginBtn');
+
+      if (!email || !pass) {
+        msg.textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
+        msg.style.display = 'block';
+        msg.style.color = '#e74c3c';
+        return;
+      }
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังเข้าสู่ระบบ...';
+      btn.disabled = true;
+      msg.style.display = 'none';
+
+      try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, pass);
+        const firebaseUser = userCredential.user;
+        
+        // Get user data from Firestore
+        let userData = { id: firebaseUser.uid, email: firebaseUser.email, role: 'member' };
+        try {
+          const userDoc = await db.collection('users').doc(firebaseUser.uid).get();
+          if (userDoc.exists) {
+            userData = { id: firebaseUser.uid, ...userDoc.data() };
+          }
+        } catch (e) {
+          console.log('Firestore user data not found:', e.message);
+        }
+
+        // Save to localStorage
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+
+        msg.textContent = 'เข้าสู่ระบบสำเร็จ!';
+        msg.style.display = 'block';
+        msg.style.color = '#2ecc71';
+        showToast('เข้าสู่ระบบสำเร็จ!', 'success');
+
+        setTimeout(() => {
+          window.location.href = userData.role === 'admin' ? 'admin/index.html' : 'user.html';
+        }, 800);
+
+      } catch (e) {
+        console.error('Login error:', e);
+        let errorMsg = 'เกิดข้อผิดพลาด';
+        if (e.code === 'auth/user-not-found') errorMsg = 'ไม่พบอีเมลนี้ในระบบ';
+        else if (e.code === 'auth/wrong-password') errorMsg = 'รหัสผ่านไม่ถูกต้อง';
+        else if (e.code === 'auth/invalid-email') errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง';
+        else if (e.code === 'auth/too-many-requests') errorMsg = 'ลองเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่';
+        else if (e.code === 'auth/invalid-credential') errorMsg = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+        else if (e.code === 'auth/network-request-failed') errorMsg = 'เกิดปัญหาการเชื่อมต่ออินเทอร์เน็ต';
+        else errorMsg = 'เกิดข้อผิดพลาด: ' + e.message;
+
+        msg.textContent = errorMsg;
+        msg.style.display = 'block';
+        msg.style.color = '#e74c3c';
+        btn.innerHTML = 'เข้าสู่ระบบ <i class="fas fa-arrow-right"></i>';
+        btn.disabled = false;
+      }
+    }
+
+    // Register form
+    document.getElementById('registerForm')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      doRegister();
+    });
+
+    // Phone number only
+    document.getElementById('regPhone')?.addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9]/g, '');
+    });
+
+    // Register function
+    async function doRegister() {
+      const fn = document.getElementById('regFirstName').value.trim();
+      const ln = document.getElementById('regLastName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const pass = document.getElementById('regPass').value;
+      const passConfirm = document.getElementById('regPassConfirm').value;
+      const msg = document.getElementById('regMsg');
+      const btn = document.getElementById('regBtn');
+
+      if (!fn || !ln || !email || !pass) {
+        msg.textContent = 'กรุณากรอกข้อมูลให้ครบทุกช่อง';
+        msg.style.display = 'block';
+        msg.style.color = '#e74c3c';
+        return;
+      }
+
+      if (pass !== passConfirm) {
+        msg.textContent = 'รหัสผ่านไม่ตรงกัน กรุณากรอกใหม่';
+        msg.style.display = 'block';
+        msg.style.color = '#e74c3c';
+        return;
+      }
+
+      if (pass.length < 6) {
+        msg.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+        msg.style.display = 'block';
+        msg.style.color = '#e74c3c';
+        return;
+      }
+
+      if (phone && !/^[0-9]{10}$/.test(phone)) {
+        msg.textContent = 'เบอร์โทรต้องเป็นตัวเลข 10 หลักเท่านั้น';
+        msg.style.display = 'block';
+        msg.style.color = '#e74c3c';
+        return;
+      }
+
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังสมัครสมาชิก...';
+      btn.disabled = true;
+      msg.style.display = 'none';
+
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+        const firebaseUser = userCredential.user;
+
+        // Save user data to Firestore
+        await db.collection('users').doc(firebaseUser.uid).set({
+          firstName: fn,
+          lastName: ln,
+          email: email,
+          phone: phone || '',
+          role: 'member',
+          suspended: false,
+          createdAt: new Date().toISOString(),
+          provider: 'email'
+        });
+
+        // Update display name
+        await firebaseUser.updateProfile({
+          displayName: fn + ' ' + ln
+        });
+
+        msg.textContent = 'สมัครสมาชิกสำเร็จ!';
+        msg.style.display = 'block';
+        msg.style.color = '#2ecc71';
+        showToast('สมัครสมาชิกสำเร็จ!', 'success');
+
+        // Auto login after register
+        setTimeout(() => {
+          localStorage.setItem('currentUser', JSON.stringify({
+            id: firebaseUser.uid,
+            firstName: fn,
+            lastName: ln,
+            email: email,
+            phone: phone,
+            role: 'member'
+          }));
+          window.location.href = 'user.html';
+        }, 1500);
+
+      } catch (e) {
+        console.error('Register error:', e);
+        let errorMsg = 'เกิดข้อผิดพลาด';
+        if (e.code === 'auth/email-already-in-use') errorMsg = 'อีเมลนี้ถูกใช้แล้ว';
+        else if (e.code === 'auth/invalid-email') errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง';
+        else if (e.code === 'auth/weak-password') errorMsg = 'รหัสผ่านไม่ปลอดภัยเพียงพอ';
+        else if (e.code === 'auth/network-request-failed') errorMsg = 'เกิดปัญหาการเชื่อมต่ออินเทอร์เน็ต';
+        else errorMsg = 'เกิดข้อผิดพลาด: ' + e.message;
+
+        msg.textContent = errorMsg;
+        msg.style.display = 'block';
+        msg.style.color = '#e74c3c';
+        btn.innerHTML = 'สมัครสมาชิก <i class="fas fa-arrow-right"></i>';
+        btn.disabled = false;
+      }
+    }
+
+    // Check if user is already logged in
+    auth.onAuthStateChanged(async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDoc = await db.collection('users').doc(firebaseUser.uid).get();
+        if (userDoc.exists) {
+          const userData = { id: firebaseUser.uid, ...userDoc.data() };
+          localStorage.setItem('currentUser', JSON.stringify(userData));
+          if (window.location.pathname.includes('auth.html')) {
+            window.location.href = userData.role === 'admin' ? 'admin/index.html' : 'user.html';
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

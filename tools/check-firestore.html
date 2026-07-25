@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Check Firestore</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a2e; color: #fff; }
+    .success { color: #4ade80; }
+    .error { color: #f87171; }
+    .info { color: #60a5fa; }
+    pre { background: #0f3460; padding: 15px; border-radius: 8px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Firestore Check</h1>
+  <pre id="output">กำลังตรวจสอบ...</pre>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAayCwC0UTVyISsKrNDNYdzGnQeFHpawAc",
+      authDomain: "inong-56c0f.firebaseapp.com",
+      projectId: "inong-56c0f",
+      storageBucket: "inong-56c0f.firebasestorage.app",
+      messagingSenderId: "838153924370",
+      appId: "1:838153924370:web:7a133b12866b6671f84dcb"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function checkFirestore() {
+      const output = document.getElementById('output');
+      let log = '';
+
+      try {
+        // Check tours collection
+        log += '=== Checking tours collection ===\n';
+        const toursSnap = await db.collection('tours').get();
+        log += 'Tours count: ' + toursSnap.size + '\n';
+        if (toursSnap.size > 0) {
+          toursSnap.forEach(doc => {
+            const data = doc.data();
+            log += '- ' + doc.id + ': ' + (data.name || 'no name') + '\n';
+          });
+        } else {
+          log += 'WARNING: No tours in Firestore!\n';
+        }
+
+        // Check users collection
+        log += '\n=== Checking users collection ===\n';
+        const usersSnap = await db.collection('users').get();
+        log += 'Users count: ' + usersSnap.size + '\n';
+        usersSnap.forEach(doc => {
+          const data = doc.data();
+          log += '- ' + doc.id + ': ' + (data.email || 'no email') + ' (role: ' + (data.role || 'member') + ')\n';
+        });
+
+        // Check bookings collection
+        log += '\n=== Checking bookings collection ===\n';
+        const bookingsSnap = await db.collection('bookings').get();
+        log += 'Bookings count: ' + bookingsSnap.size + '\n';
+
+        // Check promos collection
+        log += '\n=== Checking promos collection ===\n';
+        const promosSnap = await db.collection('promos').get();
+        log += 'Promos count: ' + promosSnap.size + '\n';
+
+        output.textContent = log;
+        output.className = 'success';
+
+      } catch (e) {
+        output.textContent = 'Error: ' + e.message;
+        output.className = 'error';
+      }
+    }
+
+    checkFirestore();
+  </script>
+</body>
+</html>

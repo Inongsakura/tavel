@@ -2,17 +2,20 @@
 <html lang="th" data-theme="dark">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>จัดการระบบ - inongtravel</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>จัดการระบบ - inongtravel Admin</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23c9a96e'/><text x='50' y='68' font-size='55' font-weight='bold' text-anchor='middle' fill='white' font-family='serif'>i</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="../assets/css/main.css">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="admin-layout">
 <aside class="admin-sidebar">
-<a href="../index.html" class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></a>
+<a href="../index.html" class="logo"><div class="logo-icon">i</div><h1>INONGTRAVEL</h1></a>
 <nav class="admin-menu">
 <a href="#" class="active" data-section="dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
 <a href="#" data-section="admin-tours"><i class="fas fa-map-marked-alt"></i> จัดการทัวร์</a>
@@ -21,11 +24,17 @@
 <a href="#" data-section="admin-promos"><i class="fas fa-tags"></i> จัดการโปรโมชั่น</a>
 </nav>
 <div style="margin-top:auto;padding-top:20px;border-top:1px solid var(--border);">
-<a href="../index.html" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:.85rem;color:var(--text-3);"><i class="fas fa-arrow-left"></i> กลับหน้าเว็บ</a>
-<a href="#" onclick="clearUser();window.location.href='../auth.html'" style="display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:.85rem;color:var(--text-3);"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
-<button class="theme-toggle" style="margin:10px 14px;width:auto;padding:8px 14px;border-radius:6px;font-size:.82rem;display:flex;align-items:center;gap:6px;" onclick="toggleTheme()"><i class="fas fa-sun"></i> สลับธีม</button>
+<a href="../index.html" style="display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:.85rem;color:var(--text-3);"><i class="fas fa-arrow-left"></i> กลับหน้าเว็บ</a>
+<a href="#" onclick="clearUser();window.location.href='../auth.html'" style="display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:.85rem;color:var(--text-3);"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</a>
+<button class="theme-toggle" style="margin:12px 16px;width:auto;padding:8px 16px;border-radius:8px;font-size:.82rem;display:flex;align-items:center;gap:8px;" onclick="toggleTheme()"><i class="fas fa-sun"></i> สลับธีม</button>
 </div>
 </aside>
+
+<div class="admin-mobile-header" style="display:none;">
+<button class="mobile-toggle" onclick="document.querySelector('.admin-sidebar').classList.toggle('show')" style="display:flex;"><span></span><span></span><span></span></button>
+<a href="../index.html" class="logo" style="flex:1;"><div class="logo-icon">i</div><h1 style="font-size:1rem;">INONGTRAVEL</h1></a>
+<button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-sun"></i></button>
+</div>
 
 <main class="admin-main">
 <!-- Dashboard -->
@@ -34,51 +43,128 @@
 <div class="stat-cards">
 <div class="stat-card"><div class="label">สมาชิกทั้งหมด</div><div class="value" id="statMembers">0</div></div>
 <div class="stat-card"><div class="label">การจองทั้งหมด</div><div class="value" id="statBookings">0</div></div>
-<div class="stat-card"><div class="label">ยอดขายรวม</div><div class="value" id="statRevenue">&#3645;0</div></div>
+<div class="stat-card"><div class="label">รายได้รวม</div><div class="value" id="statRevenue">&#3645;0</div></div>
 <div class="stat-card"><div class="label">ทัวร์ทั้งหมด</div><div class="value" id="statTours">0</div></div>
-</div></div>
+</div>
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:24px;">
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;">
+<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:18px;">รายได้รายเดือน</h4>
+<div id="monthlyChart" style="display:flex;align-items:flex-end;gap:10px;height:220px;padding-top:10px;"></div>
+<div style="display:flex;justify-content:space-between;margin-top:10px;font-size:.7rem;color:var(--text-3);" id="monthLabels"></div>
+</div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;">
+<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:18px;">สถานะการจอง</h4>
+<div id="statusChart" style="display:flex;flex-direction:column;gap:12px;"></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;">
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;">
+<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:18px;">ทัวร์ขายดี</h4>
+<div id="topTours"></div>
+</div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;">
+<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:18px;">ทัวร์ตามประเภท</h4>
+<div id="typeChart"></div>
+</div>
+</div>
+</div>
 
 <!-- Tours -->
 <div class="admin-section" id="admin-tours">
 <div class="admin-header"><h2>จัดการทัวร์</h2><button class="btn btn-gold btn-sm" onclick="document.getElementById('addTourForm').style.display=document.getElementById('addTourForm').style.display==='none'?'block':'none'"><i class="fas fa-plus"></i> เพิ่มทัวร์</button></div>
-<div id="addTourForm" style="display:none;background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
-<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:16px;">เพิ่มทัวร์ใหม่</h4>
+<div id="addTourForm" style="display:none;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:24px;">
+<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:18px;">เพิ่มทัวร์ใหม่</h4>
 <form onsubmit="addTour(event)">
 <div class="form-row"><div class="form-group"><label>ชื่อทัวร์</label><input type="text" name="name" required></div><div class="form-group"><label>ประเทศ</label><input type="text" name="country" required></div></div>
 <div class="form-row"><div class="form-group"><label>ประเภท</label><select name="type"><option value="beach">ชายหาด</option><option value="mountain">ภูเขา</option><option value="city">เมือง</option><option value="adventure">ผจญภัย</option></select></div><div class="form-group"><label>ราคา (บาท)</label><input type="number" name="price" required></div></div>
-<div class="form-row"><div class="form-group"><label>จำนวนวัน</label><input type="number" name="nights" required></div><div class="form-group"><label>ลิงก์รูป</label><input type="url" name="img"></div></div>
+<div class="form-row"><div class="form-group"><label>จำนวนวัน</label><input type="number" name="nights" required></div><div class="form-group"><label>จำนวนที่นั่ง</label><input type="number" name="seats" value="30" min="1"></div></div>
+<div class="form-group"><label>รูปภาพ URL (1 รูปต่อบรรทัด)</label><textarea rows="3" name="images"></textarea></div>
 <div class="form-group"><label>รายละเอียด</label><textarea rows="2" name="desc"></textarea></div>
 <div class="form-group"><label>สิ่งที่รวม (comma)</label><input type="text" name="includes"></div>
 <button type="submit" class="btn btn-gold">บันทึกทัวร์</button>
 </form></div>
-<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;">
-<table class="data-table"><thead><tr><th>รหัส</th><th>ชื่อทัวร์</th><th>ประเทศ</th><th>ราคา</th><th>คะแนน</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="tourTableBody"></tbody></table>
+<div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+<input type="text" id="adminTourSearch" placeholder="ค้นหาทัวร์..." style="padding:10px 16px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:.85rem;width:220px;outline:none;">
+<select id="adminTourFilter" style="padding:10px 16px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:.85rem;"><option value="all">ทุกประเภท</option><option value="beach">ชายหาด</option><option value="mountain">ภูเขา</option><option value="city">เมือง</option><option value="adventure">ผจญภัย</option></select>
+</div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;overflow-x:auto;">
+<table class="data-table"><thead><tr><th>รหัส</th><th>ทัวร์</th><th>ประเทศ</th><th>ประเภท</th><th>ราคา</th><th>ที่นั่ง</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="tourTableBody"></tbody></table>
 </div></div>
 
 <!-- Bookings -->
 <div class="admin-section" id="admin-bookings">
-<div class="admin-header"><h2>จัดการการจอง</h2></div>
-<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;">
-<table class="data-table"><thead><tr><th>รหัส</th><th>ลูกค้า</th><th>ทัวร์</th><th>วันเดินทาง</th><th>ยอดรวม</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="bookingTableBody"></tbody></table>
+<div class="admin-header"><h2>จัดการการจอง</h2>
+<div style="display:flex;gap:10px;">
+<button class="btn btn-outline btn-sm" onclick="exportBookingsPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+<button class="btn btn-outline btn-sm" onclick="exportBookingsExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+</div></div>
+<div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+<input type="text" id="adminBookingSearch" placeholder="ค้นหาชื่อ/ทัวร์..." style="padding:10px 16px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:.85rem;width:220px;outline:none;">
+<select id="adminBookingStatus" style="padding:10px 16px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:.85rem;"><option value="all">ทุกสถานะ</option><option value="pending">รอตรวจสอบ</option><option value="active">ยืนยันแล้ว</option><option value="cancel">ยกเลิก</option></select>
+</div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;overflow-x:auto;">
+<table class="data-table"><thead><tr><th>รหัส</th><th>ลูกค้า</th><th>ทัวร์</th><th>วันเดินทาง</th><th>จำนวน</th><th>ยอดรวม</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="bookingTableBody"></tbody></table>
 </div></div>
 
 <!-- Members -->
 <div class="admin-section" id="admin-members">
-<div class="admin-header"><h2>จัดการสมาชิก</h2></div>
-<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;">
+<div class="admin-header"><h2>จัดการสมาชิก</h2>
+<button class="btn btn-outline btn-sm" onclick="exportMembersExcel()"><i class="fas fa-file-excel"></i> Export</button>
+</div>
+<div style="display:flex;gap:12px;margin-bottom:18px;">
+<input type="text" id="adminMemberSearch" placeholder="ค้นหาชื่อ/อีเมล..." style="padding:10px 16px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-1);font-size:.85rem;width:220px;outline:none;">
+</div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;overflow-x:auto;">
 <table class="data-table"><thead><tr><th>รหัส</th><th>ชื่อ</th><th>อีเมล</th><th>เบอร์โทร</th><th>วันที่สมัคร</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="memberTableBody"></tbody></table>
 </div></div>
 
 <!-- Promos -->
 <div class="admin-section" id="admin-promos">
-<div class="admin-header"><h2>จัดการโปรโมชั่น</h2><button class="btn btn-gold btn-sm" onclick="showToast('ฟีเจอร์นี้จะเพิ่มเร็วๆ นี้','info')"><i class="fas fa-plus"></i> เพิ่มโปรโมชั่น</button></div>
-<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;">
-<table class="data-table"><thead><tr><th>รหัส</th><th>ชื่อ</th><th>ส่วนลด</th><th>โค้ด</th><th>รายละเอียด</th><th>หมดอายุ</th><th>สถานะ</th></tr></thead><tbody id="promoTableBody"></tbody></table>
+<div class="admin-header"><h2>จัดการโปรโมชั่น</h2><button class="btn btn-gold btn-sm" onclick="showAddPromoForm()"><i class="fas fa-plus"></i> เพิ่มโปรโมชั่น</button></div>
+<div id="addPromoForm" style="display:none;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:24px;">
+<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:18px;">เพิ่มโปรโมชั่นใหม่</h4>
+<form onsubmit="addPromo(event)">
+<div class="form-row"><div class="form-group"><label>ชื่อโปรโมชั่น</label><input type="text" name="name" required></div><div class="form-group"><label>รหัสคูปอง</label><input type="text" name="code" required style="text-transform:uppercase;"></div></div>
+<div class="form-row"><div class="form-group"><label>ส่วนลด (บาท)</label><input type="number" name="discountFlat" value="0"></div><div class="form-group"><label>ส่วนลด (%)</label><input type="number" name="discountPercent" value="0" min="0" max="100"></div></div>
+<div class="form-row"><div class="form-group"><label>วันเริ่มต้น</label><input type="date" name="startDate"></div><div class="form-group"><label>วันสิ้นสุด</label><input type="date" name="endDate"></div></div>
+<div class="form-row"><div class="form-group"><label>จำนวนครั้งที่ใช้ได้</label><input type="number" name="maxUses" value="100" min="1"></div><div class="form-group"><label>ยอดซื้อขั้นต่ำ (บาท)</label><input type="number" name="minPurchase" value="0"></div></div>
+<div class="form-group"><label>รายละเอียด</label><input type="text" name="desc"></div>
+<button type="submit" class="btn btn-gold">บันทึกโปรโมชั่น</button>
+</form></div>
+<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;overflow-x:auto;">
+<table class="data-table"><thead><tr><th>รหัส</th><th>ชื่อ</th><th>ส่วนลด</th><th>โค้ด</th><th>ใช้แล้ว/จำกัด</th><th>ขั้นต่ำ</th><th>วันสิ้นสุด</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody id="promoTableBody"></tbody></table>
 </div></div>
 </main>
 </div>
 
-<div class="modal-overlay" id="tourModal" onclick="if(event.target===this)closeModal()"><div class="modal"><button class="modal-close" onclick="closeModal()">&times;</button><div class="modal-body"></div></div></div>
+<div class="modal-overlay" id="bookingDetailModal"><div class="modal" style="max-width:560px;"><button class="modal-close" onclick="closeBookingDetail()">&times;</button><div id="bookingDetailContent"></div></div></div>
+<div class="modal-overlay" id="memberDetailModal"><div class="modal" style="max-width:560px;"><button class="modal-close" onclick="closeMemberDetail()">&times;</button><div id="memberDetailContent"></div></div></div>
+<div class="modal-overlay" id="confirmModal"><div class="modal" style="max-width:400px;text-align:center;padding:44px;">
+<h3 style="font-family:'Poppins',sans-serif;margin-bottom:14px;" id="confirmTitle">ยืนยัน</h3>
+<p style="color:var(--text-2);margin-bottom:28px;" id="confirmMsg">คุณต้องการดำเนินการนี้หรือไม่?</p>
+<div style="display:flex;gap:14px;justify-content:center;"><button class="btn btn-outline" onclick="closeConfirm()" id="confirmCancelBtn">ยกเลิก</button><button class="btn btn-gold" id="confirmOkBtn">ยืนยัน</button></div>
+</div></div>
+<div class="modal-overlay" id="editTourModal"><div class="modal" style="max-width:600px;"><button class="modal-close" onclick="closeEditTour()">&times;</button>
+<div style="padding:12px 0;"><h3 style="font-family:'Poppins',sans-serif;margin-bottom:18px;"><i class="fas fa-edit" style="color:var(--gold);"></i> แก้ไขทัวร์</h3>
+<form onsubmit="saveEditTour(event)"><input type="hidden" id="editTourId">
+<div class="form-row"><div class="form-group"><label>ชื่อทัวร์</label><input type="text" name="name" id="editTourName" required></div><div class="form-group"><label>ประเทศ</label><input type="text" name="country" id="editTourCountry" required></div></div>
+<div class="form-row"><div class="form-group"><label>ประเภท</label><select name="type" id="editTourType"><option value="beach">ชายหาด</option><option value="mountain">ภูเขา</option><option value="city">เมือง</option><option value="adventure">ผจญภัย</option></select></div><div class="form-group"><label>ราคา</label><input type="number" name="price" id="editTourPrice" required></div></div>
+<div class="form-row"><div class="form-group"><label>จำนวนวัน</label><input type="number" name="nights" id="editTourNights"></div><div class="form-group"><label>ที่นั่ง</label><input type="number" name="seats" id="editTourSeats"></div></div>
+<div class="form-group"><label>รูปภาพ URL</label><textarea rows="3" name="images" id="editTourImages"></textarea></div>
+<div class="form-group"><label>รายละเอียด</label><textarea rows="2" name="desc" id="editTourDesc"></textarea></div>
+<div class="form-group"><label>สิ่งที่รวม</label><input type="text" name="includes" id="editTourIncludes"></div>
+<div style="display:flex;gap:14px;margin-top:18px;"><button type="button" class="btn btn-outline" onclick="closeEditTour()" style="flex:1;justify-content:center;">ยกเลิก</button><button type="submit" class="btn btn-gold" style="flex:1;justify-content:center;">บันทึก</button></div>
+</form></div></div></div>
+<div class="modal-overlay" id="editPromoModal"><div class="modal" style="max-width:520px;"><button class="modal-close" onclick="closeEditPromo()">&times;</button>
+<div style="padding:12px 0;"><h3 style="font-family:'Poppins',sans-serif;margin-bottom:18px;"><i class="fas fa-edit" style="color:var(--gold);"></i> แก้ไขโปรโมชั่น</h3>
+<form onsubmit="saveEditPromo(event)"><input type="hidden" id="editPromoId">
+<div class="form-row"><div class="form-group"><label>ชื่อ</label><input type="text" name="name" id="editPromoName" required></div><div class="form-group"><label>โค้ด</label><input type="text" name="code" id="editPromoCode" required style="text-transform:uppercase;"></div></div>
+<div class="form-row"><div class="form-group"><label>ส่วนลด (บาท)</label><input type="number" name="discountFlat" id="editPromoFlat"></div><div class="form-group"><label>ส่วนลด (%)</label><input type="number" name="discountPercent" id="editPromoPct" min="0" max="100"></div></div>
+<div class="form-row"><div class="form-group"><label>วันเริ่มต้น</label><input type="date" name="startDate" id="editPromoStart"></div><div class="form-group"><label>วันสิ้นสุด</label><input type="date" name="endDate" id="editPromoEnd"></div></div>
+<div class="form-row"><div class="form-group"><label>จำนวนครั้ง</label><input type="number" name="maxUses" id="editPromoMax"></div><div class="form-group"><label>ขั้นต่ำ</label><input type="number" name="minPurchase" id="editPromoMin"></div></div>
+<div class="form-group"><label>รายละเอียด</label><input type="text" name="desc" id="editPromoDesc"></div>
+<div style="display:flex;gap:14px;margin-top:18px;"><button type="button" class="btn btn-outline" onclick="closeEditPromo()" style="flex:1;justify-content:center;">ยกเลิก</button><button type="submit" class="btn btn-gold" style="flex:1;justify-content:center;">บันทึก</button></div>
+</form></div></div></div>
 
 <script src="../assets/js/app.js"></script>
 <script src="../assets/js/admin.js"></script>

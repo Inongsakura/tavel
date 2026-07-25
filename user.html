@@ -3,17 +3,20 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>บัญชีของฉัน - inongtravel</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="description" content="จัดการบัญชี ดูประวัติการจอง แก้ไขข้อมูลส่วนตัวของคุณบน inongtravel">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23c9a96e'/><text x='50' y='68' font-size='55' font-weight='bold' text-anchor='middle' fill='white' font-family='serif'>i</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&family=Poppins:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="assets/css/main.css">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <header class="header"><nav class="navbar">
-<a href="index.html" class="logo"><div class="logo-icon">i</div><h1>inongtravel</h1></a>
+<a href="index.html" class="logo"><div class="logo-icon">i</div><h1>INONGTRAVEL</h1></a>
 <div class="nav-links"><a href="index.html">หน้าแรก</a><a href="tours.html">ทัวร์ทั้งหมด</a><a href="user.html" class="active">บัญชีของฉัน</a></div>
-<div class="nav-right"><button class="theme-toggle"><i class="fas fa-sun"></i></button><button class="mobile-toggle"><span></span><span></span><span></span></button></div>
+<div class="nav-right"><button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-sun"></i></button><button class="mobile-toggle"><span></span><span></span><span></span></button></div>
 </nav></header>
 
 <div class="container"><div class="user-layout">
@@ -30,15 +33,15 @@
 <div class="user-content">
 <div class="user-panel active" id="profile">
 <h3>แก้ไขข้อมูลส่วนตัว</h3>
-<form id="profileForm" onsubmit="updateProfile(event)" style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:28px;">
+<form id="profileForm" onsubmit="updateProfile(event)" style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;">
 <div class="form-row"><div class="form-group"><label>ชื่อ</label><input type="text" name="firstName" required></div><div class="form-group"><label>นามสกุล</label><input type="text" name="lastName" required></div></div>
 <div class="form-group"><label>อีเมล</label><input type="email" name="email" readonly style="opacity:.6;"></div>
-<div class="form-group"><label>เบอร์โทร</label><input type="tel" name="phone"></div>
+<div class="form-group"><label>เบอร์โทร</label><input type="tel" name="phone" maxlength="10"></div>
 <button type="submit" class="btn btn-gold">บันทึกข้อมูล</button>
 </form></div>
 <div class="user-panel" id="password">
 <h3>เปลี่ยนรหัสผ่าน</h3>
-<form id="passForm" onsubmit="changePassword(event)" style="background:var(--bg-3);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:400px;">
+<form id="passForm" onsubmit="changePassword(event)" style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;max-width:400px;">
 <div class="form-group"><label>รหัสผ่านเดิม</label><input type="password" name="oldPassword" required></div>
 <div class="form-group"><label>รหัสผ่านใหม่</label><input type="password" name="newPassword" required minlength="6"></div>
 <div class="form-group"><label>ยืนยันรหัสผ่านใหม่</label><input type="password" name="confirmPassword" required></div>
@@ -48,74 +51,234 @@
 <div class="user-panel" id="wishlist"><h3>รายการโปรด</h3><div class="tour-grid" id="wishlistList"></div></div>
 </div></div></div>
 
+<div class="modal-overlay" id="editBookingModal"><div class="modal" style="max-width:520px;">
+<button class="modal-close" onclick="closeEditBookingModal()">&times;</button>
+<div style="padding:12px 0;">
+<h3 style="font-family:'Poppins',sans-serif;font-size:1.1rem;margin-bottom:24px;"><i class="fas fa-edit" style="color:var(--gold);"></i> แก้ไขการจอง</h3>
+<input type="hidden" id="editBookingId">
+<div class="form-row"><div class="form-group"><label>วันเดินทาง</label><input type="date" id="editBkDate"></div><div class="form-group"><label>จำนวนผู้เดินทาง</label><input type="number" id="editBkTravelers" min="1" max="20"></div></div>
+<div class="form-group"><label>เบอร์โทร</label><input type="tel" id="editBkPhone" maxlength="10"></div>
+<div class="form-group"><label>หมายเหตุ</label><textarea id="editBkNote" rows="2"></textarea></div>
+<div style="display:flex;gap:14px;margin-top:20px;"><button class="btn btn-outline" onclick="closeEditBookingModal()" style="flex:1;justify-content:center;">ยกเลิก</button><button class="btn btn-gold" onclick="saveEditBooking()" style="flex:1;justify-content:center;">บันทึก</button></div>
+</div>
+</div></div>
+
+<div class="modal-overlay" id="confirmModal"><div class="modal" style="max-width:400px;text-align:center;padding:44px;">
+<h3 style="font-family:'Poppins',sans-serif;margin-bottom:14px;" id="confirmTitle">ยืนยัน</h3>
+<p style="color:var(--text-2);margin-bottom:28px;" id="confirmMsg">คุณต้องการดำเนินการนี้หรือไม่?</p>
+<div style="display:flex;gap:14px;justify-content:center;"><button class="btn btn-outline" onclick="closeConfirm()" id="confirmCancelBtn">ยกเลิก</button><button class="btn btn-gold" id="confirmOkBtn">ยืนยัน</button></div>
+</div></div>
+
 <div class="modal-overlay" id="tourModal"><div class="modal"><button class="modal-close" onclick="closeModal()">&times;</button><div class="modal-body"></div></div></div>
 
 <script src="assets/js/app.js"></script>
 <script>
-// Redirect if not logged in
+// Initialize header on page load
+document.addEventListener('DOMContentLoaded', function() {
+  if(typeof initHeader === 'function') initHeader();
+  if(typeof initTheme === 'function') initTheme();
+  if(typeof updateWishlistBadge === 'function') updateWishlistBadge();
+});
+
+// Theme toggle function
+function initTheme(){const s=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',s);updateThemeIcon(s)}
+function toggleTheme(){const c=document.documentElement.getAttribute('data-theme');const n=c==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('theme',n);updateThemeIcon(n)}
+function updateThemeIcon(t){document.querySelectorAll('.theme-toggle').forEach(b=>b.innerHTML=t==='dark'?'<i class="fas fa-sun"></i>':'<i class="fas fa-moon"></i>')}
+
 const user=getUser();if(!user){window.location.href='auth.html'}
 else if(user.role==='admin'){window.location.href='admin/index.html'}
 
-// Load user data
 if(user){
-  document.querySelector('.user-avatar').src=`https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=c8a97e&color=fff&size=80`;
+  const avatarUrl=`https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName)}+${encodeURIComponent(user.lastName)}&background=c9a96e&color=fff&size=80`;
+  const avatar=document.querySelector('.user-avatar');
+  if(avatar){
+    avatar.src=avatarUrl;
+    avatar.alt=`${user.firstName} ${user.lastName}`;
+    avatar.onerror=function(){handleImageError(this,'avatar')};
+  }
   document.querySelector('.user-name').textContent=`${user.firstName} ${user.lastName}`;
   document.querySelector('.user-email').textContent=user.email;
   const form=document.getElementById('profileForm');
   if(form){form.firstName.value=user.firstName;form.lastName.value=user.lastName;form.email.value=user.email;form.phone.value=user.phone||''}
 }
 
-// Menu tabs
+document.querySelector('[name="phone"]')?.addEventListener('input',function(){this.value=this.value.replace(/[^0-9]/g,'')});
+
 document.querySelectorAll('.user-menu a').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.user-menu a').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.user-panel').forEach(p=>p.classList.remove('active'));a.classList.add('active');document.getElementById(a.dataset.panel)?.classList.add('active')})});
 
-// URL param
 const params=new URLSearchParams(location.search);const panel=params.get('panel');
 if(panel)document.querySelector(`[data-panel="${panel}"]`)?.click();
 
-// Profile update
 async function updateProfile(e){
   e.preventDefault();const u=getUser();if(!u)return;const f=e.target;
-  try{if(u.id&&u.id!=='admin')await db.collection('users').doc(u.id).update({firstName:f.firstName.value,lastName:f.lastName.value,phone:f.phone.value})}catch{}
-  setUser({...u,firstName:f.firstName.value,lastName:f.lastName.value,phone:f.phone.value});
+  const phone=f.phone.value.trim();
+  if(phone&&!/^[0-9]{10}$/.test(phone)){showToast('เบอร์โทรต้องเป็นตัวเลข 10 หลัก','error');return}
+  try{if(u.id&&u.id!=='admin')await db.collection('users').doc(u.id).update({firstName:f.firstName.value,lastName:f.lastName.value,phone})}catch{}
+  setUser({...u,firstName:f.firstName.value,lastName:f.lastName.value,phone});
   showToast('บันทึกสำเร็จ!','success');initUserPanel();
 }
-function initUserPanel(){const u=getUser();if(!u)return;document.querySelector('.user-avatar').src=`https://ui-avatars.com/api/?name=${u.firstName}+${u.lastName}&background=c8a97e&color=fff&size=80`;document.querySelector('.user-name').textContent=`${u.firstName} ${u.lastName}`;document.querySelector('.user-email').textContent=u.email;const form=document.getElementById('profileForm');if(form){form.firstName.value=u.firstName;form.lastName.value=u.lastName;form.email.value=u.email;form.phone.value=u.phone||''}}
-
-// Change password
-async function changePassword(e){
-  e.preventDefault();const f=e.target;const u=getUser();
-  if(f.oldPassword.value!==u.password){showToast('รหัสผ่านเดิมไม่ถูกต้อง','error');return}
-  if(f.newPassword.value!==f.confirmPassword.value){showToast('รหัสผ่านใหม่ไม่ตรงกัน','error');return}
-  try{if(u.id&&u.id!=='admin')await db.collection('users').doc(u.id).update({password:f.newPassword.value})}catch{}
-  setUser({...u,password:f.newPassword.value});f.reset();showToast('เปลี่ยนรหัสผ่านสำเร็จ!','success');
+function initUserPanel(){
+  const u=getUser();
+  if(!u)return;
+  const avatarUrl=`https://ui-avatars.com/api/?name=${encodeURIComponent(u.firstName)}+${encodeURIComponent(u.lastName)}&background=c9a96e&color=fff&size=80`;
+  const avatar=document.querySelector('.user-avatar');
+  if(avatar){
+    avatar.src=avatarUrl;
+    avatar.alt=`${u.firstName} ${u.lastName}`;
+    avatar.onerror=function(){handleImageError(this,'avatar')};
+  }
+  document.querySelector('.user-name').textContent=`${u.firstName} ${u.lastName}`;
+  document.querySelector('.user-email').textContent=u.email;
+  const form=document.getElementById('profileForm');
+  if(form){form.firstName.value=u.firstName;form.lastName.value=u.lastName;form.email.value=u.email;form.phone.value=u.phone||''}
 }
 
-// Load bookings
+async function changePassword(e){
+  e.preventDefault();
+  const f=e.target;
+  const u=getUser();
+  if(!u){showToast('กรุณาเข้าสู่ระบบ','error');return}
+  if(f.newPassword.value!==f.confirmPassword.value){showToast('รหัสผ่านใหม่ไม่ตรงกัน','error');return}
+  if(f.newPassword.value.length<6){showToast('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร','error');return}
+
+  try{
+    const firebaseUser = auth.currentUser;
+    if(!firebaseUser){showToast('กรุณาเข้าสู่ระบบใหม่','error');return}
+
+    // Re-authenticate user before changing password
+    const credential = firebase.auth.EmailAuthProvider.credential(
+      firebaseUser.email,
+      f.oldPassword.value
+    );
+    await firebaseUser.reauthenticateWithCredential(credential);
+
+    // Update password in Firebase Auth
+    await firebaseUser.updatePassword(f.newPassword.value);
+
+    f.reset();
+    showToast('เปลี่ยนรหัสผ่านสำเร็จ!','success');
+  }catch(e){
+    let errorMsg = 'เกิดข้อผิดพลาด';
+    if(e.code === 'auth/wrong-password') errorMsg = 'รหัสผ่านเดิมไม่ถูกต้อง';
+    else if(e.code === 'auth/weak-password') errorMsg = 'รหัสผ่านใหม่ไม่ปลอดภัยเพียงพอ';
+    else if(e.code === 'auth/requires-recent-login') errorMsg = 'กรุณาเข้าสู่ระบบใหม่แล้วลองอีกครั้ง';
+    showToast(errorMsg,'error');
+  }
+}
+
+let confirmCallback=null;
+function showConfirm(title,msg,onConfirm){document.getElementById('confirmTitle').textContent=title;document.getElementById('confirmMsg').textContent=msg;confirmCallback=onConfirm;document.getElementById('confirmModal').classList.add('show');document.body.style.overflow='hidden'}
+function closeConfirm(){document.getElementById('confirmModal').classList.remove('show');document.body.style.overflow='';confirmCallback=null}
+document.getElementById('confirmOkBtn')?.addEventListener('click',()=>{if(confirmCallback)confirmCallback();closeConfirm()});
+document.getElementById('confirmCancelBtn')?.addEventListener('click',closeConfirm);
+
 async function loadBookings(){
   const el=document.getElementById('bookingList');const u=getUser();if(!el||!u)return;
+  showLoading(el, 'กำลังโหลดประวัติการจอง...');
   try{
-    // ใช้ where อย่างเดียว ไม่ใช้ orderBy เพื่อหลีก composite index
     const snap=await db.collection('bookings').where('userId','==',u.id).get();
     const bks=snap.docs.map(d=>({id:d.id,...d.data()}));
-    // เรียงลำดับด้วย JavaScript แทน
     bks.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
-    if(!bks.length){el.innerHTML='<p style="color:var(--text-3);text-align:center;padding:40px;">ยังไม่มีประวัติการจอง</p>';return}
-    el.innerHTML=bks.map(b=>`<div style="display:flex;gap:14px;padding:14px;background:var(--bg-4);border-radius:10px;margin-bottom:10px;align-items:center;">
-      <div style="flex:1;"><h4 style="font-family:'Poppins',sans-serif;font-size:.88rem;">${b.tourName}</h4>
-      <p style="font-size:.78rem;color:var(--text-3);">วันเดินทาง: ${b.date} | ${b.travelers} คน</p></div>
-      <div style="text-align:right;"><div style="font-weight:600;color:var(--gold);">&#3645;${(b.total||0).toLocaleString()}</div>
-      <span class="status status-${b.status}">${b.status==='active'?'ยืนยันแล้ว':b.status==='pending'?'รอตรวจสอบ':'ยกเลิก'}</span></div>
-    </div>`).join('');
-  }catch(e){console.error('loadBookings error:',e);el.innerHTML='<p style="color:var(--text-3);">ไม่สามารถโหลดข้อมูล: '+e.message+'</p>'}
+    if(!bks.length){el.innerHTML='<div style="text-align:center;padding:52px 20px;color:var(--text-3);"><i class="far fa-calendar-check" style="font-size:3rem;display:block;margin-bottom:14px;"></i><p>ยังไม่มีประวัติการจอง</p><a href="tours.html" class="btn btn-gold btn-sm" style="margin-top:18px;">เลือกทัวร์เลย</a></div>';return}
+    el.innerHTML=bks.map(b=>{
+      const statusLabel=b.status==='active'?'ยืนยันแล้ว':b.status==='pending'?'รอตรวจสอบ':b.status==='cancel'?'ยกเลิก':b.status;
+      const canEdit=b.status==='pending';const canCancel=b.status==='pending'||b.status==='active';
+      return `<div style="padding:18px;background:var(--bg-4);border-radius:12px;margin-bottom:12px;border:1px solid var(--border);">
+      <div style="display:flex;gap:16px;align-items:center;">
+        <img src="${b.tourImg||''}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex-shrink:0;">
+        <div style="flex:1;min-width:0;"><h4 style="font-family:'Poppins',sans-serif;font-size:.9rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.tourName}</h4>
+        <p style="font-size:.78rem;color:var(--text-3);">วันเดินทาง: ${b.date} | ${b.travelers} คน</p></div>
+        <div style="text-align:right;flex-shrink:0;"><div style="font-weight:600;color:var(--gold);font-size:.95rem;">&#3645;${(b.total||0).toLocaleString()}</div>
+        <span class="status status-${b.status}" style="margin-top:4px;">${statusLabel}</span></div>
+      </div>
+      ${canEdit||canCancel?`<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;">
+        <button class="btn btn-outline btn-sm" onclick="downloadBookingPDF('${b.id}')"><i class="fas fa-download"></i> ใบจอง</button>
+        ${canEdit?`<button class="btn btn-outline btn-sm" onclick="openEditBooking('${b.id}')"><i class="fas fa-edit"></i> แก้ไข</button>`:''}
+        ${canCancel?`<button class="btn btn-outline btn-sm btn-danger" onclick="cancelBooking('${b.id}','${b.tourName}')"><i class="fas fa-times"></i> ยกเลิก</button>`:''}
+      </div>`:''}</div>`}).join('');
+  }catch(e){el.innerHTML='<p style="color:var(--text-3);">ไม่สามารถโหลดข้อมูล: '+e.message+'</p>'}
 }
 
-// Load wishlist
+function cancelBooking(id,tourName){showConfirm('ยกเลิกการจอง',`ต้องการยกเลิก "${tourName}"?`,async()=>{try{await db.collection('bookings').doc(id).update({status:'cancel'});showToast('ยกเลิกสำเร็จ','success');loadBookings()}catch(e){showToast('เกิดข้อผิดพลาด','error')}})}
+
+async function downloadBookingPDF(id){
+  try{
+    const doc=await db.collection('bookings').doc(id).get();
+    if(!doc.exists){showToast('ไม่พบข้อมูล','error');return}
+    const b=doc.data();
+    const statusLabel=b.status==='active'?'ยืนยันแล้ว':b.status==='pending'?'รอตรวจสอบ':'ยกเลิก';
+    let html=`<html><head><meta charset="utf-8"><title>ใบจอง - inongtravel</title><style>
+      body{font-family:'Sarabun','Tahoma',sans-serif;padding:40px;color:#333;}
+      h1{text-align:center;color:#c9a96e;margin-bottom:4px;font-size:24px;}
+      h2{text-align:center;font-size:13px;color:#666;margin-bottom:30px;}
+      .header{text-align:center;margin-bottom:30px;border-bottom:2px solid #c9a96e;padding-bottom:20px;}
+      .row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:14px;}
+      .row .label{color:#888;width:140px;}
+      .row .value{font-weight:600;}
+      .total{border-top:2px solid #c9a96e;padding-top:16px;margin-top:20px;text-align:right;font-size:20px;font-weight:700;color:#c9a96e;}
+      .status{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;}
+      .status-active{background:#e8f5e9;color:#2e7d32;}
+      .status-pending{background:#fff8e1;color:#f57f17;}
+      .status-cancel{background:#fce4ec;color:#c62828;}
+      .footer{text-align:center;margin-top:40px;font-size:11px;color:#999;border-top:1px solid #eee;padding-top:16px;}
+    </style></head><body>
+    <div class="header"><h1>INONGTRAVEL</h1><h2>ใบจองทัวร์ / Tour Booking Receipt</h2></div>
+    <div class="row"><div class="label">รหัสการจอง</div><div class="value">#${id.slice(-6).toUpperCase()}</div></div>
+    <div class="row"><div class="label">สถานะ</div><div class="value"><span class="status status-${b.status}">${statusLabel}</span></div></div>
+    <div class="row"><div class="label">ชื่อผู้จอง</div><div class="value">${b.firstName} ${b.lastName}</div></div>
+    <div class="row"><div class="label">เบอร์โทร</div><div class="value">${b.phone||'-'}</div></div>
+    <div class="row"><div class="label">ทัวร์</div><div class="value">${b.tourName}</div></div>
+    <div class="row"><div class="label">วันเดินทาง</div><div class="value">${b.date}</div></div>
+    <div class="row"><div class="label">จำนวนผู้เดินทาง</div><div class="value">${b.travelers} คน</div></div>
+    ${b.coupon?`<div class="row"><div class="label">คูปอง</div><div class="value">${b.coupon} (-฿${(b.discount||0).toLocaleString()})</div></div>`:''}
+    <div class="row"><div class="label">วันที่จอง</div><div class="value">${b.createdAt?new Date(b.createdAt).toLocaleDateString('th-TH'):'-'}</div></div>
+    <div class="total">ยอดรวม: ฿${(b.total||0).toLocaleString()}</div>
+    <div class="footer">inongtravel - แพ็กเกจทัวร์สุดหรู<br>ติดต่อ: 02-123-4567 | info@inongtravel.com</div>
+    </body></html>`;
+    const win=window.open('','_blank');win.document.write(html);win.document.close();setTimeout(()=>win.print(),500);
+    showToast('เปิดใบจองแล้ว กด Print เพื่อบันทึก PDF','success');
+  }catch(e){showToast('เกิดข้อผิดพลาด: '+e.message,'error')}
+}
+
+async function openEditBooking(id){
+  try{const doc=await db.collection('bookings').doc(id).get();if(!doc.exists){showToast('ไม่พบข้อมูล','error');return}
+    const b=doc.data();document.getElementById('editBookingId').value=id;document.getElementById('editBkDate').value=b.date||'';document.getElementById('editBkTravelers').value=b.travelers||1;document.getElementById('editBkPhone').value=b.phone||'';document.getElementById('editBkNote').value=b.note||'';
+    const t=new Date();document.getElementById('editBkDate').setAttribute('min',`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`);
+    document.getElementById('editBookingModal').classList.add('show');document.body.style.overflow='hidden';
+  }catch(e){showToast('เกิดข้อผิดพลาด','error')}
+}
+function closeEditBookingModal(){document.getElementById('editBookingModal').classList.remove('show');document.body.style.overflow=''}
+async function saveEditBooking(){
+  const id=document.getElementById('editBookingId').value;const date=document.getElementById('editBkDate').value;
+  const travelers=parseInt(document.getElementById('editBkTravelers').value)||1;
+  const phone=document.getElementById('editBkPhone').value.trim();const note=document.getElementById('editBkNote').value.trim();
+  if(!date){showToast('กรุณาเลือกวันเดินทาง','error');return}
+  if(travelers<1){showToast('จำนวนผู้เดินทางต้องมากกว่า 0','error');return}
+  if(phone&&!/^[0-9]{10}$/.test(phone)){showToast('เบอร์โทรต้องเป็นตัวเลข 10 หลัก','error');return}
+  try{const doc=await db.collection('bookings').doc(id).get();const b=doc.data();
+    const newTotal=b.total?Math.round((b.total/(b.travelers||1))*travelers):b.total;
+    await db.collection('bookings').doc(id).update({date,travelers,phone,note,total:newTotal});
+    showToast('แก้ไขสำเร็จ!','success');closeEditBookingModal();loadBookings();
+  }catch(e){showToast('เกิดข้อผิดพลาด','error')}
+}
+
 async function loadWishlist(){
   const el=document.getElementById('wishlistList');const u=getUser();if(!el||!u)return;
   const wl=JSON.parse(localStorage.getItem('wishlist_'+u.id)||'[]');
-  const tours=TOURS.filter(t=>wl.includes(t.id));
-  if(!tours.length){el.innerHTML='<div style="text-align:center;padding:48px 20px;color:var(--text-3);"><i class="far fa-heart" style="font-size:3rem;display:block;margin-bottom:12px;"></i><p>ยังไม่มีรายการโปรด</p></div>';return}
-  renderTours(el,tours);
+  if(!wl.length){el.innerHTML='<div style="text-align:center;padding:52px 20px;color:var(--text-3);"><i class="far fa-heart" style="font-size:3rem;display:block;margin-bottom:14px;"></i><p>ยังไม่มีรายการโปรด</p></div>';return}
+
+  showSkeleton(el, 4);
+
+  try{
+    const tours=await getToursFromDB();
+    const wishlistTours=tours.filter(t=>wl.includes(t.id));
+    if(!wishlistTours.length){el.innerHTML='<div style="text-align:center;padding:52px 20px;color:var(--text-3);"><i class="far fa-heart" style="font-size:3rem;display:block;margin-bottom:14px;"></i><p>ไม่พบทัวร์ในรายการโปรด</p></div>';return}
+    renderTours(el,wishlistTours);
+  }catch(e){
+    const tours=TOURS.filter(t=>wl.includes(t.id));
+    if(!tours.length){el.innerHTML='<div style="text-align:center;padding:52px 20px;color:var(--text-3);"><i class="far fa-heart" style="font-size:3rem;display:block;margin-bottom:14px;"></i><p>ยังไม่มีรายการโปรด</p></div>';return}
+    renderTours(el,tours);
+  }
 }
 
 loadBookings();loadWishlist();
