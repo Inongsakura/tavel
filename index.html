@@ -137,7 +137,7 @@ function loadDestinations(){
   getToursFromDB().then(tours=>{
     const types=['beach','mountain','city','adventure'];
     const dests=types.map(type=>{const t=tours.find(x=>x.type===type);return t?{id:t.id,name:t.name,img:t.images?.[0]||DEFAULT_IMAGES.tourCard,price:t.price,type}:null}).filter(Boolean);
-    grid.innerHTML=dests.map(d=>`<div class="dest-card" onclick="showTourDetail('${d.id}')" style="cursor:pointer;"><img src="${d.img}" alt="${d.name}" loading="lazy" onerror="handleImageError(this,'tourCard')"><div class="overlay"></div><div class="info"><h4>${d.name}</h4><span>&#3645;${d.price.toLocaleString()}</span></div></div>`).join('');
+    grid.innerHTML=dests.map(d=>`<div class="dest-card" onclick="showTourDetail('${d.id}')" style="cursor:pointer;"><img src="${d.img}" alt="${d.name}" loading="lazy" onerror="handleImageError(this,'tourCard')"><div class="overlay"></div><div class="info"><h4>${d.name}</h4><span>฿${d.price.toLocaleString()}</span></div></div>`).join('');
     setupImageErrorHandling();
   });
 }

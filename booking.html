@@ -84,7 +84,7 @@
 <p style="font-size:.82rem;color:var(--text-3);margin-bottom:18px;" id="summaryNights"></p>
 <div class="summary-row"><span>ราคาต่อคน</span><span id="summaryPrice"></span></div>
 <div class="summary-row"><span>จำนวนผู้เดินทาง</span><span id="summaryTravelers">1 คน</span></div>
-<div class="summary-row"><span>ส่วนลด</span><span id="summaryDiscount" style="color:#2ecc71;">-&#3645;0</span></div>
+<div class="summary-row"><span>ส่วนลด</span><span id="summaryDiscount" style="color:#2ecc71;">-฿0</span></div>
 <div class="summary-total"><span>รวมทั้งหมด</span><span id="summaryTotal"></span></div>
 </div>
 </div>
@@ -153,8 +153,8 @@ async function initBooking(){
   document.getElementById('summaryImg').onerror=function(){this.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="160"><rect fill="%231a1a2e" width="400" height="160"/><text fill="%23666" x="200" y="80" text-anchor="middle">ไม่มีรูปภาพ</text></svg>'};
   document.getElementById('summaryTour').textContent=selectedTour.name;
   document.getElementById('summaryNights').textContent=selectedTour.nights+' วัน '+(selectedTour.nights-1)+' คืน | '+selectedPackageName;
-  document.getElementById('summaryPrice').innerHTML='&#3645;'+selectedPrice.toLocaleString();
-  document.getElementById('summaryTotal').innerHTML='&#3645;'+selectedPrice.toLocaleString();
+  document.getElementById('summaryPrice').innerHTML='฿'+selectedPrice.toLocaleString();
+  document.getElementById('summaryTotal').innerHTML='฿'+selectedPrice.toLocaleString();
 }
 
 // Run init booking
@@ -172,16 +172,18 @@ document.getElementById('bkTravelers')?.addEventListener('change',function(){
 function updateTotal(){
   const travelers=parseInt(document.getElementById('bkTravelers').value)||1;
   const total=Math.max(0,selectedPrice*travelers-discountAmount);
-  document.getElementById('summaryTotal').innerHTML=`&#3645;${total.toLocaleString()}`;
+  document.getElementById('summaryTotal').innerHTML=`฿${total.toLocaleString()}`;
   document.getElementById('summaryTravelers').textContent=travelers+' คน';
 }
 
 document.getElementById('bkPhone')?.addEventListener('input',function(){this.value=this.value.replace(/[^0-9]/g,'')});
 
+let slipData=null;
 document.getElementById('slipFile')?.addEventListener('change',function(){
   const file=this.files[0];if(!file)return;
+  if(file.size>2*1024*1024){showToast('ไฟล์สลิปต้องไม่เกิน 2MB','error');this.value='';return}
   const reader=new FileReader();
-  reader.onload=function(e){document.getElementById('slipPreviewImg').src=e.target.result;document.getElementById('slipPreview').style.display='block'};
+  reader.onload=function(e){document.getElementById('slipPreviewImg').src=e.target.result;document.getElementById('slipPreview').style.display='block';slipData=e.target.result};
   reader.readAsDataURL(file);
 });
 
@@ -255,6 +257,7 @@ async function submitBooking(){
       status:'pending',
       coupon:couponApplied||null,
       discount:discountAmount,
+      slipImage:slipData||null,
       createdAt:new Date().toISOString()
     });
     document.getElementById('bookingCode').textContent=docRef.id.slice(-6).toUpperCase();
@@ -286,8 +289,8 @@ async function applyCoupon(){
       if(promo.minPurchase&&subtotal<promo.minPurchase){msg.textContent=`ยอดซื้อขั้นต่ำ ${promo.minPurchase.toLocaleString()} บาท`;msg.style.color='#e74c3c';msg.style.display='block';return}
       const discPct=promo.discountPercent||0;const discFlat=promo.discountFlat||0;
       discountAmount=Math.min(subtotal,discFlat||(subtotal*discPct/100));
-      couponApplied=code;msg.textContent=`ใช้คูปอง ${code} สำเร็จ! ลด &#3645;${discountAmount.toLocaleString()}`;msg.style.color='#2ecc71';msg.style.display='block';
-      document.getElementById('summaryDiscount').innerHTML='-&#3645;'+discountAmount.toLocaleString();updateTotal();showToast('ใช้คูปองสำเร็จ!','success');return;
+      couponApplied=code;msg.textContent=`ใช้คูปอง ${code} สำเร็จ! ลด ฿${discountAmount.toLocaleString()}`;msg.style.color='#2ecc71';msg.style.display='block';
+      document.getElementById('summaryDiscount').innerHTML='-฿'+discountAmount.toLocaleString();updateTotal();showToast('ใช้คูปองสำเร็จ!','success');return;
     }
   }catch(e){}
   const codes={EARLY30:30,FLASH25:25,NEW15:15,SUMMER20:20,LUXE30:30,NEWUSER:15};
@@ -295,8 +298,8 @@ async function applyCoupon(){
     const pct=codes[code];const travelers=parseInt(document.getElementById('bkTravelers').value)||1;
     discountAmount=Math.round(selectedPrice*travelers*pct/100);couponApplied=code;
     msg.textContent=`ใช้คูปอง ${code} สำเร็จ! ลด ${pct}%`;msg.style.color='#2ecc71';msg.style.display='block';
-    document.getElementById('summaryDiscount').innerHTML='-&#3645;'+discountAmount.toLocaleString();updateTotal();showToast('ใช้คูปองสำเร็จ!','success');
-  }else{msg.textContent='รหัสคูปองไม่ถูกต้อง';msg.style.color='#e74c3c';msg.style.display='block';discountAmount=0;couponApplied=null;document.getElementById('summaryDiscount').innerHTML='-&#3645;0';updateTotal()}
+    document.getElementById('summaryDiscount').innerHTML='-฿'+discountAmount.toLocaleString();updateTotal();showToast('ใช้คูปองสำเร็จ!','success');
+  }else{msg.textContent='รหัสคูปองไม่ถูกต้อง';msg.style.color='#e74c3c';msg.style.display='block';discountAmount=0;couponApplied=null;document.getElementById('summaryDiscount').innerHTML='-฿0';updateTotal()}
 }
 </script>
 </body></html>

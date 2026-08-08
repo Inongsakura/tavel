@@ -59,13 +59,13 @@ async function renderAdminStats(){
     allMembers=users;allBookings=bookings;allToursAdmin=tours;
     document.getElementById('statMembers').textContent=users.length;
     document.getElementById('statBookings').textContent=bookings.length;
-    document.getElementById('statRevenue').innerHTML=`&#3645;${bookings.filter(b=>b.status==='active').reduce((s,b)=>s+(b.total||0),0).toLocaleString()}`;
+    document.getElementById('statRevenue').innerHTML=`฿${bookings.filter(b=>b.status==='active').reduce((s,b)=>s+(b.total||0),0).toLocaleString()}`;
     document.getElementById('statTours').textContent=tours.length;
   }catch(e){
     console.error('Error loading stats:',e);
     document.getElementById('statMembers').textContent='0';
     document.getElementById('statBookings').textContent='0';
-    document.getElementById('statRevenue').innerHTML='&#3645;0';
+    document.getElementById('statRevenue').innerHTML='฿0';
     document.getElementById('statTours').textContent='0';
   }
 }
@@ -195,7 +195,7 @@ function filterAndRenderTours(){
     // Get price from packages or fallback to t.price
     const minPrice=t.packages?Math.min(...t.packages.map(p=>p.price)):(parseInt(t.price)||0);
     const hasPackages=t.packages&&t.packages.length>0;
-    const priceDisplay=hasPackages?`&#3645;${minPrice.toLocaleString()}+`:`&#3645;${minPrice.toLocaleString()}`;
+    const priceDisplay=hasPackages?`฿${minPrice.toLocaleString()}+`:`฿${minPrice.toLocaleString()}`;
     const pkgCount=hasPackages?` (${t.packages.length} แพ็กเกจ)`:'';
     return `<tr><td>#${String(t.id).slice(-4)}</td><td><div style="display:flex;align-items:center;gap:8px;"><img src="${t.images?.[0]||t.img||''}" style="width:48px;height:36px;border-radius:4px;object-fit:cover;">${t.name}</div></td><td>${t.country}</td><td>${typeLabels[t.type]||t.type}</td><td style="color:var(--gold);">${priceDisplay}</td><td style="font-size:.75rem;color:var(--text-3);">${pkgCount||'-'}</td><td><span class="status ${t.hidden?'status-cancel':'status-active'}">${t.hidden?'ซ่อน':'แสดง'}</span></td><td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="openEditTour('${t.id}')" title="แก้ไข"><i class="fas fa-edit"></i></button> <button class="btn btn-outline btn-sm" onclick="toggleTourVisibility('${t.id}',${!!t.hidden})" title="${t.hidden?'แสดง':'ซ่อน'}"><i class="fas fa-${t.hidden?'eye':'eye-slash'}"></i></button> <button class="btn btn-outline btn-sm btn-danger" onclick="deleteTour('${t.id}')" title="ลบ"><i class="fas fa-trash"></i></button></td></tr>`;
   }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--text-3);">ไม่พบทัวร์</td></tr>';
@@ -352,7 +352,7 @@ function filterAndRenderBookings(){
   const status=document.getElementById('adminBookingStatus')?.value||'all';
   if(search)bookings=bookings.filter(b=>(b.firstName+' '+b.lastName).toLowerCase().includes(search)||b.tourName?.toLowerCase().includes(search));
   if(status!=='all')bookings=bookings.filter(b=>b.status===status);
-  tbody.innerHTML=bookings.length?bookings.map(b=>`<tr><td style="font-family:monospace;font-size:.78rem;">#${b.id.slice(-6).toUpperCase()}</td><td>${b.firstName} ${b.lastName}</td><td>${b.tourName}</td><td>${b.date}</td><td>${b.travelers} คน</td><td style="color:var(--gold);">&#3645;${(b.total||0).toLocaleString()}</td><td><span class="status status-${b.status}">${b.status==='active'?'ยืนยันแล้ว':b.status==='pending'?'รอตรวจสอบ':'ยกเลิก'}</span></td><td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="showBookingDetail('${b.id}')" title="ดูรายละเอียด"><i class="fas fa-eye"></i></button> ${b.status==='pending'?`<button class="btn btn-success btn-sm" onclick="updateBooking('${b.id}','active')" title="อนุมัติ"><i class="fas fa-check"></i></button> <button class="btn btn-danger btn-sm" onclick="updateBooking('${b.id}','cancel')" title="ยกเลิก"><i class="fas fa-times"></i></button>`:''} <button class="btn btn-outline btn-sm btn-danger" onclick="deleteBooking('${b.id}')" title="ลบ"><i class="fas fa-trash"></i></button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--text-3);">ไม่พบข้อมูล</td></tr>';
+  tbody.innerHTML=bookings.length?bookings.map(b=>`<tr><td style="font-family:monospace;font-size:.78rem;">#${b.id.slice(-6).toUpperCase()}</td><td>${b.firstName} ${b.lastName}</td><td>${b.tourName}</td><td>${b.date}</td><td>${b.travelers} คน</td><td style="color:var(--gold);">฿${(b.total||0).toLocaleString()}</td><td><span class="status status-${b.status}">${b.status==='active'?'ยืนยันแล้ว':b.status==='pending'?'รอตรวจสอบ':'ยกเลิก'}</span></td><td style="white-space:nowrap;"><button class="btn btn-outline btn-sm" onclick="showBookingDetail('${b.id}')" title="ดูรายละเอียด"><i class="fas fa-eye"></i></button> ${b.status==='pending'?`<button class="btn btn-success btn-sm" onclick="updateBooking('${b.id}','active')" title="อนุมัติ"><i class="fas fa-check"></i></button> <button class="btn btn-danger btn-sm" onclick="updateBooking('${b.id}','cancel')" title="ยกเลิก"><i class="fas fa-times"></i></button>`:''} <button class="btn btn-outline btn-sm btn-danger" onclick="deleteBooking('${b.id}')" title="ลบ"><i class="fas fa-trash"></i></button></td></tr>`).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--text-3);">ไม่พบข้อมูล</td></tr>';
 }
 
 async function updateBooking(id,status){
@@ -392,11 +392,12 @@ function showBookingDetail(id){
     <div><label style="font-size:.75rem;color:var(--text-3);">ทัวร์</label><p>${b.tourName}</p></div>
     <div><label style="font-size:.75rem;color:var(--text-3);">วันเดินทาง</label><p>${b.date}</p></div>
     <div><label style="font-size:.75rem;color:var(--text-3);">จำนวนผู้เดินทาง</label><p>${b.travelers} คน</p></div>
-    <div><label style="font-size:.75rem;color:var(--text-3);">ยอดรวม</label><p style="color:var(--gold);font-weight:600;font-size:1.1rem;">&#3645;${(b.total||0).toLocaleString()}</p></div>
-    ${b.coupon?`<div><label style="font-size:.75rem;color:var(--text-3);">คูปอง</label><p>${b.coupon} (-&#3645;${(b.discount||0).toLocaleString()})</p></div>`:''}
+    <div><label style="font-size:.75rem;color:var(--text-3);">ยอดรวม</label><p style="color:var(--gold);font-weight:600;font-size:1.1rem;">฿${(b.total||0).toLocaleString()}</p></div>
+    ${b.coupon?`<div><label style="font-size:.75rem;color:var(--text-3);">คูปอง</label><p>${b.coupon} (-฿${(b.discount||0).toLocaleString()})</p></div>`:''}
     <div><label style="font-size:.75rem;color:var(--text-3);">จองเมื่อ</label><p>${b.createdAt?new Date(b.createdAt).toLocaleString('th-TH'):'-'}</p></div>
   </div>
-  ${b.note?`<div style="margin-top:16px;"><label style="font-size:.75rem;color:var(--text-3);">หมายเหตุ</label><p style="background:var(--bg-4);padding:10px;border-radius:6px;font-size:.85rem;">${b.note}</p></div>`:''}`;
+  ${b.note?`<div style="margin-top:16px;"><label style="font-size:.75rem;color:var(--text-3);">หมายเหตุ</label><p style="background:var(--bg-4);padding:10px;border-radius:6px;font-size:.85rem;">${b.note}</p></div>`:''}
+  ${b.slipImage?`<div style="margin-top:16px;"><label style="font-size:.75rem;color:var(--text-3);">สลิปการโอนเงิน</label><div style="margin-top:8px;"><img src="${b.slipImage}" style="max-width:100%;max-height:300px;border-radius:8px;border:1px solid var(--border);cursor:pointer;" onclick="window.open(this.src,'_blank')" title="คลิกเพื่อดูรูปขนาดใหญ่"></div></div>`:''}`;
   document.getElementById('bookingDetailModal').classList.add('show');document.body.style.overflow='hidden';
 }
 function closeBookingDetail(){document.getElementById('bookingDetailModal').classList.remove('show');document.body.style.overflow=''}
@@ -408,10 +409,10 @@ function exportBookingsPDF(){
   if(status!=='all')bookings=bookings.filter(b=>b.status===status);
   let html=`<html><head><meta charset="utf-8"><title>รายงานการจอง - inongtravel</title><style>body{font-family:'Sarabun',sans-serif;padding:40px;}h1{text-align:center;color:#c9a96e;margin-bottom:8px;}h2{text-align:center;font-size:14px;color:#666;margin-bottom:30px;}table{width:100%;border-collapse:collapse;margin-top:20px;}th,td{border:1px solid #ddd;padding:8px 10px;font-size:12px;text-align:left;}th{background:#f5f5f0;font-weight:600;}.total{text-align:right;font-weight:bold;font-size:14px;margin-top:20px;}.gold{color:#c9a96e;}</style></head><body><h1>inongtravel</h1><h2>รายงานการจองทั้งหมด (${new Date().toLocaleDateString('th-TH')})</h2><table><thead><tr><th>รหัส</th><th>ลูกค้า</th><th>ทัวร์</th><th>วันเดินทาง</th><th>จำนวน</th><th>ยอดรวม</th><th>สถานะ</th></tr></thead><tbody>`;
   bookings.forEach(b=>{
-    html+=`<tr><td>#${b.id.slice(-6).toUpperCase()}</td><td>${b.firstName} ${b.lastName}</td><td>${b.tourName}</td><td>${b.date}</td><td>${b.travelers}</td><td class="gold">&#3645;${(b.total||0).toLocaleString()}</td><td>${b.status==='active'?'ยืนยัน':b.status==='pending'?'รอตรวจสอบ':'ยกเลิก'}</td></tr>`;
+    html+=`<tr><td>#${b.id.slice(-6).toUpperCase()}</td><td>${b.firstName} ${b.lastName}</td><td>${b.tourName}</td><td>${b.date}</td><td>${b.travelers}</td><td class="gold">฿${(b.total||0).toLocaleString()}</td><td>${b.status==='active'?'ยืนยัน':b.status==='pending'?'รอตรวจสอบ':'ยกเลิก'}</td></tr>`;
   });
   const total=bookings.filter(b=>b.status==='active').reduce((s,b)=>s+(b.total||0),0);
-  html+=`</tbody></table><div class="total">รายได้รวม: <span class="gold">&#3645;${total.toLocaleString()}</span></div></body></html>`;
+  html+=`</tbody></table><div class="total">รายได้รวม: <span class="gold">฿${total.toLocaleString()}</span></div></body></html>`;
   const win=window.open('','_blank');win.document.write(html);win.document.close();win.print();
 }
 
@@ -516,7 +517,7 @@ async function showMemberDetail(id){
   <h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:12px;"><i class="fas fa-calendar-check" style="color:var(--gold);"></i> ประวัติการจอง (${memberBookings.length})</h4>
   ${memberBookings.length?memberBookings.map(b=>`<div style="display:flex;gap:10px;padding:10px;background:var(--bg-4);border-radius:8px;margin-bottom:8px;align-items:center;">
     <div style="flex:1;"><div style="font-size:.85rem;font-weight:500;">${b.tourName}</div><div style="font-size:.75rem;color:var(--text-3);">วันเดินทาง: ${b.date} | ${b.travelers} คน</div></div>
-    <div style="text-align:right;"><div style="font-weight:600;color:var(--gold);font-size:.85rem;">&#3645;${(b.total||0).toLocaleString()}</div><span class="status status-${b.status}" style="font-size:.68rem;">${b.status==='active'?'ยืนยัน':b.status==='pending'?'รอตรวจสอบ':'ยกเลิก'}</span></div>
+    <div style="text-align:right;"><div style="font-weight:600;color:var(--gold);font-size:.85rem;">฿${(b.total||0).toLocaleString()}</div><span class="status status-${b.status}" style="font-size:.68rem;">${b.status==='active'?'ยืนยัน':b.status==='pending'?'รอตรวจสอบ':'ยกเลิก'}</span></div>
   </div>`).join(''):'<p style="color:var(--text-3);font-size:.85rem;">ยังไม่มีประวัติการจอง</p>'}`;
   document.getElementById('memberDetailModal').classList.add('show');document.body.style.overflow='hidden';
 }
@@ -607,5 +608,5 @@ async function saveEditPromo(e){
 }
 
 /* ===== ADMIN INIT RUN ===== */
-function initAllAdmin(){initTheme();document.querySelectorAll('.theme-toggle').forEach(b=>b.addEventListener('click',toggleTheme));Promise.resolve(initAdmin()).catch(e=>console.error('Admin init error:',e))}
+function initAllAdmin(){initTheme();Promise.resolve(initAdmin()).catch(e=>console.error('Admin init error:',e))}
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initAllAdmin)}else{initAllAdmin()}

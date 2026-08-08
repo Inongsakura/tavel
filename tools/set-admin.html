@@ -90,7 +90,17 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="authGate" style="display:none;">
+    <h1>🔒 ใส่รหัสผ่าน</h1>
+    <p class="subtitle">กรอกรหัสผ่านเพื่อเข้าถึงเครื่องมือ</p>
+    <div class="form-group">
+      <label>รหัสผ่าน</label>
+      <input type="password" id="toolPass" placeholder="กรอกรหัสผ่าน" onkeydown="if(event.key==='Enter')checkToolAuth()">
+    </div>
+    <button class="btn" onclick="checkToolAuth()"><i class="fas fa-lock"></i> เข้าสู่ระบบ</button>
+    <div class="status error" id="authMsg" style="display:none;"></div>
+  </div>
+  <div class="container" id="toolContent" style="display:none;">
     <h1>🔑 ตั้งค่า Admin</h1>
     <p class="subtitle">จัดการสิทธิ์ผู้ใช้งาน</p>
 
@@ -112,6 +122,16 @@
   </div>
 
   <script>
+    // Tool password protection
+    const TOOL_PASSWORD = 'inong2024';
+    function checkToolAuth(){
+      const pass=document.getElementById('toolPass').value;
+      if(pass===TOOL_PASSWORD){sessionStorage.setItem('tool_auth','1');document.getElementById('authGate').style.display='none';document.getElementById('toolContent').style.display='block';}
+      else{const m=document.getElementById('authMsg');m.textContent='รหัสผ่านไม่ถูกต้อง';m.style.display='block';}
+    }
+    if(sessionStorage.getItem('tool_auth')==='1'){document.getElementById('authGate').style.display='none';document.getElementById('toolContent').style.display='block';}
+    else{document.getElementById('authGate').style.display='block';}
+
     const firebaseConfig = {
       apiKey: "AIzaSyAayCwC0UTVyISsKrNDNYdzGnQeFHpawAc",
       authDomain: "inong-56c0f.firebaseapp.com",

@@ -121,7 +121,14 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="authGate" style="display:none;">
+    <h1>🔒 ใส่รหัสผ่าน</h1>
+    <p class="subtitle">กรอกรหัสผ่านเพื่อเข้าถึงเครื่องมือ</p>
+    <div class="form-group"><label>รหัสผ่าน</label><input type="password" id="toolPass" placeholder="กรอกรหัสผ่าน" onkeydown="if(event.key==='Enter')checkToolAuth()"></div>
+    <button class="btn-upload" onclick="checkToolAuth()">เข้าสู่ระบบ</button>
+    <div id="authMsg" style="color:#f87171;margin-top:12px;display:none;"></div>
+  </div>
+  <div class="container" id="toolContent" style="display:none;">
     <h1>🏖️ อัพโหลดข้อมูลทัวร์ 20 รายการ</h1>
     <p class="subtitle">ข้อมูลทัวร์ครบถ้วน ขึ้น Firebase Firestore</p>
     
@@ -147,6 +154,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script>
+    const TOOL_PASSWORD='inong2024';
+    function checkToolAuth(){const p=document.getElementById('toolPass').value;if(p===TOOL_PASSWORD){sessionStorage.setItem('tool_auth','1');document.getElementById('authGate').style.display='none';document.getElementById('toolContent').style.display='block';}else{const m=document.getElementById('authMsg');m.textContent='รหัสผ่านไม่ถูกต้อง';m.style.display='block';}}
+    if(sessionStorage.getItem('tool_auth')==='1'){document.getElementById('authGate').style.display='none';document.getElementById('toolContent').style.display='block';}else{document.getElementById('authGate').style.display='block';}
+
     const firebaseConfig = {
       apiKey: "AIzaSyAayCwC0UTVyISsKrNDNYdzGnQeFHpawAc",
       authDomain: "inong-56c0f.firebaseapp.com",
@@ -420,5 +431,6 @@
     // แสดงรายการทัวร์เมื่อโหลดหน้า
     showTourList();
   </script>
+  </div>
 </body>
 </html>

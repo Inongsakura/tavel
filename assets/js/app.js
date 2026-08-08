@@ -293,7 +293,7 @@ function renderTours(container,tours,limit=0){
     const eBadge=t.badge==='hot'?'ยอดนิยม':t.badge==='new'?'ใหม่':t.badge==='premium'?'พรีเมียม':t.badge;
     const minPrice=t.packages?Math.min(...t.packages.map(p=>p.price)):t.price;
     const maxPrice=t.packages?Math.max(...t.packages.map(p=>p.price)):t.price;
-    const priceRange=t.packages?`&#3645;${minPrice.toLocaleString()} - &#3645;${maxPrice.toLocaleString()}`:`&#3645;${minPrice.toLocaleString()}`;
+    const priceRange=t.packages?`฿${minPrice.toLocaleString()} - ฿${maxPrice.toLocaleString()}`:`฿${minPrice.toLocaleString()}`;
     const imgSrc=t.images?.[0]||t.img||DEFAULT_IMAGES.tourCard;
     return `<div class="tour-card"><div class="tour-card-img"><img src="${imgSrc}" alt="${eName}" loading="lazy" decoding="async" onerror="handleImageError(this,'tourCard')">${t.badge?`<span class="tour-badge badge-${t.badge}">${eBadge}</span>`:''}<button class="wishlist-btn" onclick="event.stopPropagation();doWishlist('${t.id}',this)"><i class="fas fa-heart"></i></button></div><div class="tour-card-body" onclick="showTourDetail('${t.id}')"><h4>${eName}</h4><div class="tour-meta"><span><i class="fas fa-map-marker-alt"></i>${eCountry}</span><span><i class="far fa-clock"></i>${t.nights} วัน ${t.nights-1} คืน</span></div><div class="tour-rating"><i class="fas fa-star"></i> ${t.rating} (${t.reviews} รีวิว)</div><div class="tour-price"><div><span class="amount">${priceRange}</span> <span class="unit">/คน</span></div><button class="btn-detail" onclick="event.stopPropagation();showTourDetail('${t.id}')">ดูรายละเอียด</button></div></div></div>`;
   }).join('');
@@ -329,7 +329,7 @@ async function showTourDetail(id){
     pkgTabsHtml=`<div style="display:flex;gap:10px;margin:20px 0;flex-wrap:wrap;">
       ${packages.map((p,i)=>`<button class="pkg-tab ${i===0?'active':''}" data-tier="${p.tier}" onclick="selectPackage('${t.id}','${p.tier}',this)" style="flex:1;min-width:100px;padding:12px 8px;border-radius:10px;border:2px solid ${i===0?'var(--gold)':'var(--border)'};background:${i===0?'var(--gold-bg)':'var(--bg-3)'};cursor:pointer;transition:all .3s;text-align:center;">
         <div style="font-size:.75rem;color:var(--text-3);margin-bottom:4px;">${escHtml(p.name)}</div>
-        <div style="font-size:1.1rem;font-weight:700;color:${i===0?'var(--gold)':'var(--text-1)'};">&#3645;${p.price.toLocaleString()}</div>
+        <div style="font-size:1.1rem;font-weight:700;color:${i===0?'var(--gold)':'var(--text-1)'};">฿${p.price.toLocaleString()}</div>
         <div style="font-size:.7rem;color:var(--text-3);margin-top:4px;">${escHtml(p.desc)}</div>
       </button>`).join('')}
     </div>`;
@@ -374,7 +374,7 @@ async function showTourDetail(id){
     ${t.excludes?`<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:10px;"><i class="fas fa-times-circle" style="color:#e74c3c;"></i> ไม่รวม</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">${exclHtml}</div>`:''}
     ${initItin.length>0?`<h4 style="font-family:'Poppins',sans-serif;font-size:.95rem;margin-bottom:14px;"><i class="fas fa-route" style="color:var(--gold);"></i> กำหนดการเดินทาง</h4><div id="pkgItinerary">${itinHtml}</div>`:''}
     <div style="display:flex;gap:12px;margin-top:24px;">
-      <a href="booking.html?tour=${t.id}&tier=${_selectedTier}" id="bookNowBtn" class="btn btn-gold" style="flex:1;justify-content:center;">จองเลย &#3645;${initPrice.toLocaleString()}</a>
+      <a href="booking.html?tour=${t.id}&tier=${_selectedTier}" id="bookNowBtn" class="btn btn-gold" style="flex:1;justify-content:center;">จองเลย ฿${initPrice.toLocaleString()}</a>
       <button class="btn btn-outline" onclick="doWishlist('${t.id}')" style="flex:0;"><i class="fas fa-heart"></i></button>
     </div>`;
   modal.classList.add('show');document.body.style.overflow='hidden';
@@ -418,7 +418,7 @@ function selectPackage(tourId,tier,btn){
     const bookBtn=document.getElementById('bookNowBtn');
     if(bookBtn){
       bookBtn.href=`booking.html?tour=${tourId}&tier=${tier}`;
-      bookBtn.innerHTML=`จองเลย &#3645;${pkg.price.toLocaleString()}`;
+      bookBtn.innerHTML=`จองเลย ฿${pkg.price.toLocaleString()}`;
     }
   });
 }
@@ -728,7 +728,7 @@ function initAll(){
   initSlider();
   initCounters();
   updateWishlistBadge();
-  document.querySelectorAll('.theme-toggle').forEach(b=>b.addEventListener('click',toggleTheme));
+  // theme-toggle uses onclick in HTML to avoid double-fire
   document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal()}));
   initHeader();
   initTourFilter().catch(()=>{});
@@ -743,3 +743,34 @@ if(document.readyState==='loading'){
 } else {
   initAll();
 }
+
+// Register Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').then(reg=>{
+      console.log('SW registered:',reg.scope);
+    }).catch(err=>console.log('SW registration failed:',err));
+  });
+}
+
+// Floating contact button
+function initFloatingContact(){
+  if(document.getElementById('floatingContact'))return;
+  if(window.location.pathname.includes('/admin/')||window.location.pathname.includes('/tools/'))return;
+  const el=document.createElement('div');
+  el.id='floatingContact';
+  el.innerHTML=`
+    <style>
+      .fab-contact{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+      .fab-contact a{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;color:#fff;text-decoration:none;font-size:1.5rem;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:transform .2s;}
+      .fab-contact a:hover{transform:scale(1.1);}
+      .fab-line{background:#06C755;}
+      .fab-wa{background:#25D366;}
+    </style>
+    <div class="fab-contact">
+      <a href="https://line.me/R/ti/p/@inongtravel" target="_blank" class="fab-line" title="แชท LINE"><i class="fab fa-line"></i></a>
+      <a href="https://wa.me/66812345678" target="_blank" class="fab-wa" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+    </div>`;
+  document.body.appendChild(el);
+}
+document.addEventListener('DOMContentLoaded',initFloatingContact);

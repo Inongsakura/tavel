@@ -378,6 +378,20 @@
         }
       }
     });
+
+    // Register Service Worker
+    if('serviceWorker' in navigator){
+      window.addEventListener('load',()=>{
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+      });
+    }
+
+    // Floating contact button
+    (function(){
+      const el=document.createElement('div');
+      el.innerHTML='<style>.fab-contact{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:10px;}.fab-contact a{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;color:#fff;text-decoration:none;font-size:1.5rem;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:transform .2s;}.fab-contact a:hover{transform:scale(1.1);}.fab-line{background:#06C755;}.fab-wa{background:#25D366;}</style><div class="fab-contact"><a href="https://line.me/R/ti/p/@inongtravel" target="_blank" class="fab-line" title="แชท LINE"><i class="fab fa-line"></i></a><a href="https://wa.me/66812345678" target="_blank" class="fab-wa" title="WhatsApp"><i class="fab fa-whatsapp"></i></a></div>';
+      document.body.appendChild(el);
+    })();
   </script>
 </body>
 </html>

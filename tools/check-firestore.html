@@ -14,10 +14,21 @@
   </style>
 </head>
 <body>
+  <div id="authGate" style="display:none;text-align:center;">
+    <h1>🔒 ใส่รหัสผ่าน</h1>
+    <input type="password" id="toolPass" placeholder="กรอกรหัสผ่าน" style="padding:12px;background:#1a1a2e;border:1px solid #333;border-radius:8px;color:#fff;font-size:1rem;margin:16px 0;width:300px;" onkeydown="if(event.key==='Enter')checkToolAuth()">
+    <br><button onclick="checkToolAuth()" style="padding:12px 24px;background:#e94560;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:1rem;">เข้าสู่ระบบ</button>
+    <p id="authMsg" style="color:#f87171;margin-top:12px;display:none;"></p>
+  </div>
+  <div id="toolContent" style="display:none;">
   <h1>Firestore Check</h1>
   <pre id="output">กำลังตรวจสอบ...</pre>
 
   <script>
+    const TOOL_PASSWORD='inong2024';
+    function checkToolAuth(){const p=document.getElementById('toolPass').value;if(p===TOOL_PASSWORD){sessionStorage.setItem('tool_auth','1');document.getElementById('authGate').style.display='none';document.getElementById('toolContent').style.display='block';checkFirestore();}else{const m=document.getElementById('authMsg');m.textContent='รหัสผ่านไม่ถูกต้อง';m.style.display='block';}}
+    if(sessionStorage.getItem('tool_auth')==='1'){document.getElementById('authGate').style.display='none';document.getElementById('toolContent').style.display='block';}else{document.getElementById('authGate').style.display='block';}
+
     const firebaseConfig = {
       apiKey: "AIzaSyAayCwC0UTVyISsKrNDNYdzGnQeFHpawAc",
       authDomain: "inong-56c0f.firebaseapp.com",
@@ -78,5 +89,6 @@
 
     checkFirestore();
   </script>
+  </div>
 </body>
 </html>

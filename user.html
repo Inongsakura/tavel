@@ -188,7 +188,7 @@ async function loadBookings(){
         <img src="${b.tourImg||''}" style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex-shrink:0;">
         <div style="flex:1;min-width:0;"><h4 style="font-family:'Poppins',sans-serif;font-size:.9rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.tourName}</h4>
         <p style="font-size:.78rem;color:var(--text-3);">วันเดินทาง: ${b.date} | ${b.travelers} คน</p></div>
-        <div style="text-align:right;flex-shrink:0;"><div style="font-weight:600;color:var(--gold);font-size:.95rem;">&#3645;${(b.total||0).toLocaleString()}</div>
+        <div style="text-align:right;flex-shrink:0;"><div style="font-weight:600;color:var(--gold);font-size:.95rem;">฿${(b.total||0).toLocaleString()}</div>
         <span class="status status-${b.status}" style="margin-top:4px;">${statusLabel}</span></div>
       </div>
       ${canEdit||canCancel?`<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;">
